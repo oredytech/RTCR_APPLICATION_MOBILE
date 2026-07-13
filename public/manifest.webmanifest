@@ -1,0 +1,20 @@
+{
+  "name": "RTCR — Radio Télévision Communautaire la Référence",
+  "short_name": "RTCR",
+  "description": "Radio Télévision Communautaire la Référence — Actualités, radio FM 96.0 Mhz et TV canal 6 depuis Komanda, RDC.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0c0e12",
+  "theme_color": "#1a4bff",
+  "lang": "fr",
+  "categories": ["news", "music", "entertainment"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

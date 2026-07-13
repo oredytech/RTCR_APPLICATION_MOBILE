@@ -14,6 +14,7 @@ import { Route as LiveRouteImport } from './routes/live'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as ConnectRouteImport } from './routes/connect'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiRssRouteImport } from './routes/api/rss'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -40,6 +41,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiRssRoute = ApiRssRouteImport.update({
+  id: '/api/rss',
+  path: '/api/rss',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/discover': typeof DiscoverRoute
   '/live': typeof LiveRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/rss': typeof ApiRssRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/discover': typeof DiscoverRoute
   '/live': typeof LiveRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/rss': typeof ApiRssRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +70,27 @@ export interface FileRoutesById {
   '/discover': typeof DiscoverRoute
   '/live': typeof LiveRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/rss': typeof ApiRssRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/connect' | '/discover' | '/live' | '/sitemap.xml'
+  fullPaths:
+    | '/'
+    | '/connect'
+    | '/discover'
+    | '/live'
+    | '/sitemap.xml'
+    | '/api/rss'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/connect' | '/discover' | '/live' | '/sitemap.xml'
-  id: '__root__' | '/' | '/connect' | '/discover' | '/live' | '/sitemap.xml'
+  to: '/' | '/connect' | '/discover' | '/live' | '/sitemap.xml' | '/api/rss'
+  id:
+    | '__root__'
+    | '/'
+    | '/connect'
+    | '/discover'
+    | '/live'
+    | '/sitemap.xml'
+    | '/api/rss'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,6 +99,7 @@ export interface RootRouteChildren {
   DiscoverRoute: typeof DiscoverRoute
   LiveRoute: typeof LiveRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ApiRssRoute: typeof ApiRssRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -116,6 +139,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/rss': {
+      id: '/api/rss'
+      path: '/api/rss'
+      fullPath: '/api/rss'
+      preLoaderRoute: typeof ApiRssRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -125,6 +155,7 @@ const rootRouteChildren: RootRouteChildren = {
   DiscoverRoute: DiscoverRoute,
   LiveRoute: LiveRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ApiRssRoute: ApiRssRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

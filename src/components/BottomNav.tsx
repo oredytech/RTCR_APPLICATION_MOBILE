@@ -2,10 +2,10 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Icon } from "./Icon";
 
 const items = [
-  { to: "/", label: "Home", icon: "home" },
-  { to: "/live", label: "Live", icon: "radio" },
-  { to: "/discover", label: "Discover", icon: "explore" },
-  { to: "/connect", label: "Connect", icon: "chat_bubble" },
+  { to: "/", label: "Accueil", icon: "home" },
+  { to: "/live", label: "Direct", icon: "radio" },
+  { to: "/discover", label: "Actualités", icon: "newspaper" },
+  { to: "/connect", label: "Contact", icon: "call" },
 ] as const;
 
 export function BottomNav() {
@@ -25,7 +25,9 @@ export function BottomNav() {
             }`}
           >
             <Icon name={item.icon} filled={active} />
-            <span className="text-[10px] font-medium uppercase tracking-wide">{item.label}</span>
+            <span className="text-[10px] font-medium uppercase tracking-wide">
+              {item.label}
+            </span>
           </Link>
         );
       })}
