@@ -1,75 +1,93 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import logoAsset from "@/assets/logo_rtcr.webp.asset.json";
 import { AppShell } from "@/components/AppShell";
 import { Icon } from "@/components/Icon";
+import { fetchActualites } from "@/lib/actualites.functions";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Accueil — RTCR" },
+      {
+        name: "description",
+        content:
+          "RTCR — Radio Télévision Communautaire la Référence. Radio FM 96.0 Mhz, TV canal 6, actualités et services depuis Komanda, RDC.",
+      },
+    ],
+  }),
   component: HomePage,
 });
 
-const recommended = [
-  {
-    title: "Neural Frontiers",
-    meta: "Tech • 45m",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuD5u-3Z34PBm-sAbOMTL9E4H7GhlIUOUuAgMvXbkHYzk0XyOrgbdMMt_dHICnHhsehvwbKpsV4rKHFCCJtf0deoJ_9DGNPay1Bo3iJBu-xCgseyRMFyWNyNEo9q68il1EuxNAhHS_isPWwcvJ22EM2MfXJ5prBvQ2PVTwk3uVuF0T87zUrJTM_I9cVezwTZ1V__aeLd-tTkOUU_eM7PnJGX4cNUg2gg6ML6cQpNItSCZafB2O4pVDao",
-  },
-  {
-    title: "Midnight Stories",
-    meta: "Culture • 1h 12m",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuCLjoQihFtfyJAs_72e29V1yq10b1WArrNToK1tcgV0pG4a7X6OcMq0HKaklffBWOPEGOCoLs3VcsvYm-Qd8qEsqC4e2Nq2TABEzJFcRZ3kURQ_36CaCZWL-Dax4oP9wnVuj7X6rsKeSo8zhZCMQWcawdIg0owXb89P3HODeK5dvp49Z-VpuYw27lyoWivtusxrpIE6maCMMn42CaYhSxu9lZWA4pFhKi72yMxpsT50wngzLIeH8Me2",
-  },
-  {
-    title: "The Daily Pulse",
-    meta: "News • 22m",
-    img: "https://lh3.googleusercontent.com/aida-public/AB6AXuCj9wA-AKVpLRpDRgo1cWWNgFluqX1e1wdN0tRWO33JXX9TmA_FtEnvVqK8g3p_bvVuQScHHN2HTkWIghVM0V4ldXHtVayGcvEU7dGbxGbtYivLTJWU4SzynICOnO285QJGSXKFDB4NV24CnE3hTdrUTdW2roygQREiQUqR3pewdSjrUUUvd1P-w15hHnL_Fp0KcwG4QQYUmMnqr98qgBpH9m-h1OCzmU-8hSEqfq_fuxRvXRf1sL-L",
-  },
-];
-
 function HomePage() {
+  const { data: actus = [] } = useQuery({
+    queryKey: ["actualites"],
+    queryFn: () => fetchActualites(),
+    refetchInterval: 5 * 60 * 1000,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const top = actus.slice(0, 3);
+
   return (
     <AppShell>
       <div className="space-y-10">
-        <section className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">Good evening, Alex</h1>
-          <p className="text-on-surface-variant opacity-80">Ready for your nightly session?</p>
+        <section className="space-y-2">
+          <span className="text-xs font-semibold uppercase tracking-widest text-primary">
+            Bienvenue sur RTCR
+          </span>
+          <h1 className="text-3xl font-bold tracking-tight">
+            La Référence, à votre écoute
+          </h1>
+          <p className="text-on-surface-variant">
+            Radio Télévision Communautaire la Référence — informations fiables
+            et programmes engageants pour renforcer notre communauté.
+          </p>
         </section>
 
         <section className="space-y-4">
           <div className="flex items-end justify-between">
-            <h2 className="text-2xl font-bold">Live Now</h2>
+            <h2 className="text-2xl font-bold">En direct</h2>
             <span className="text-xs font-semibold uppercase tracking-widest text-secondary">
-              On Air
+              On air
             </span>
           </div>
           <Link
             to="/live"
-            className="group relative block h-64 w-full overflow-hidden rounded-2xl glass-card transition-transform active:scale-[0.98]"
+            className="group relative block h-56 w-full overflow-hidden rounded-2xl glass-card transition-transform active:scale-[0.98]"
           >
-            <img
-              alt="Studio background"
-              className="absolute inset-0 h-full w-full object-cover opacity-60 transition-transform duration-700 group-hover:scale-105"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDjA2dzlDChlXIvhOJIMc5Pe4d-lxSB-v7a4zerDdtex7gUECGIl0hyFUVT-OJUBUV4mzMkJg81dL4KFyOgeLMDyCNC66sQiWdQWR6LkdN889Xq4ko5IJNKMsfWSOQ19fSlO_shboRYSopgjbqSMKHZaVugbL6iJ7p41i-qfX6tvpP9lOfpmXYtNzMxeDhiaC6PQyPIvGUKvzmwufOEiemkY-s-e8CxVX-BE02A5HOsYtEsClegXYsu"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/20 to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 z-10 flex items-end justify-between p-5">
-              <div className="space-y-1">
-                <div className="mb-2 flex items-center gap-2">
-                  <div className="flex h-4 items-end gap-1">
-                    <span className="waveform-bar" style={{ animationDelay: "0.1s" }} />
-                    <span className="waveform-bar" style={{ animationDelay: "0.3s" }} />
-                    <span className="waveform-bar" style={{ animationDelay: "0.2s" }} />
-                    <span className="waveform-bar" style={{ animationDelay: "0.4s" }} />
-                  </div>
-                  <span className="text-xs font-semibold uppercase tracking-widest text-primary">
-                    98.4 Urban Beats
-                  </span>
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-surface to-surface" />
+            <div className="absolute right-0 top-0 h-full w-1/2 opacity-30">
+              <img
+                src={logoAsset.url}
+                alt=""
+                className="h-full w-full object-contain"
+              />
+            </div>
+            <div className="relative z-10 flex h-full flex-col justify-between p-5">
+              <div className="flex items-center gap-2">
+                <div className="flex h-4 items-end gap-1">
+                  <span className="waveform-bar" style={{ animationDelay: "0.1s" }} />
+                  <span className="waveform-bar" style={{ animationDelay: "0.3s" }} />
+                  <span className="waveform-bar" style={{ animationDelay: "0.2s" }} />
+                  <span className="waveform-bar" style={{ animationDelay: "0.4s" }} />
                 </div>
-                <h3 className="text-2xl font-bold leading-tight">After Hours Mix</h3>
-                <p className="text-sm text-on-surface-variant opacity-80">
-                  with DJ Luna • 42k listening
-                </p>
+                <span className="text-xs font-semibold uppercase tracking-widest text-primary">
+                  Radio 96.0 Mhz · TV Canal 6
+                </span>
               </div>
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-on-primary shadow-[0_0_20px_rgba(26,75,255,0.4)] transition-transform active:scale-90">
-                <Icon name="play_arrow" filled className="text-[32px]" />
+              <div className="flex items-end justify-between">
+                <div>
+                  <h3 className="text-2xl font-bold leading-tight">
+                    Écoutez RTCR en direct
+                  </h3>
+                  <p className="text-sm text-on-surface-variant">
+                    Lun–Ven 04h50–21h00 · en ligne 24h/7
+                  </p>
+                </div>
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-on-primary shadow-[0_0_20px_rgba(26,75,255,0.4)] transition-transform active:scale-90">
+                  <Icon name="play_arrow" filled className="text-[32px]" />
+                </div>
               </div>
             </div>
           </Link>
@@ -77,61 +95,96 @@ function HomePage() {
 
         <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Recommended</h2>
-            <Link to="/discover" className="text-xs font-semibold uppercase tracking-widest text-primary">
-              See all
+            <h2 className="text-2xl font-bold">Dernières actualités</h2>
+            <Link
+              to="/discover"
+              className="text-xs font-semibold uppercase tracking-widest text-primary"
+            >
+              Tout voir
             </Link>
           </div>
-          <div className="-mx-5 flex gap-4 overflow-x-auto px-5 hide-scrollbar">
-            {recommended.map((p) => (
-              <div key={p.title} className="group w-40 min-w-[10rem] cursor-pointer space-y-2">
-                <div className="relative aspect-square overflow-hidden rounded-xl glass-card">
-                  <img
-                    alt={p.title}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    src={p.img}
-                  />
-                  <div className="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-100">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-on-primary">
-                      <Icon name="play_arrow" filled className="text-base" />
-                    </div>
+          {top.length === 0 ? (
+            <p className="rounded-2xl p-4 glass-card text-sm text-on-surface-variant">
+              Chargement des actualités depuis rtcr.net…
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {top.map((a) => (
+                <a
+                  key={a.slug}
+                  href={a.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group flex items-center gap-4 rounded-2xl p-3 glass-card transition-transform active:scale-[0.99]"
+                >
+                  <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-surface-container-high">
+                    {a.image ? (
+                      <img
+                        alt=""
+                        className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                        src={a.image}
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-on-surface-variant">
+                        <Icon name="newspaper" />
+                      </div>
+                    )}
                   </div>
-                </div>
-                <h4 className="line-clamp-1 font-semibold group-hover:text-primary">{p.title}</h4>
-                <p className="line-clamp-1 text-xs text-on-surface-variant opacity-70">{p.meta}</p>
-              </div>
-            ))}
-          </div>
+                  <div className="flex-grow space-y-1">
+                    <span className="text-[10px] font-semibold uppercase tracking-widest text-secondary">
+                      rtcr.net · Actualité
+                    </span>
+                    <h4 className="line-clamp-2 font-bold leading-tight group-hover:text-primary">
+                      {a.title}
+                    </h4>
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
         </section>
 
         <section className="space-y-4">
-          <h2 className="text-2xl font-bold">Recent News</h2>
-          <Link
-            to="/connect"
-            className="group flex cursor-pointer items-center gap-4 rounded-2xl p-3 glass-card transition-transform active:scale-[0.99]"
-          >
-            <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg">
-              <img
-                alt="AI Audio"
-                className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDA6VEhIb1IHnzPfcNF3C0HdhcbLmLbDgszCD4DI9Z6WPoTbYMgGy-lJiI2D9i4NarT3H9H7mHI3MF_cYWA9840T9F7A79Z7Xlis2F8Zcf8JQHEmDq2jwjTEobekpw_C22hFqZWipUoTVyZA_dpYTZE5Xe7B1sM8GMRmfhQrbvmqZ_wa2roYTZUt4x3TrIKOnYYT6_SUzGEin3xUfnCb5OQ2UrjkalMWFGvBPj-I2guGPraYirA2nNC"
-              />
-            </div>
-            <div className="flex-grow space-y-1">
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-secondary">
-                World News • 2h ago
-              </span>
-              <h4 className="font-bold leading-tight group-hover:text-primary">
-                The Future of AI Audio: What's Next for Podcasting?
-              </h4>
-              <div className="flex items-center gap-2 text-xs text-on-surface-variant opacity-70">
-                <Icon name="schedule" className="text-[14px]" />
-                <span>4 min read</span>
+          <h2 className="text-2xl font-bold">Nos services</h2>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            {SERVICES.map((s) => (
+              <div key={s.title} className="rounded-2xl p-4 glass-card">
+                <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary">
+                  <Icon name={s.icon} filled />
+                </div>
+                <h3 className="mb-1 font-bold">{s.title}</h3>
+                <p className="line-clamp-3 text-sm text-on-surface-variant">
+                  {s.desc}
+                </p>
               </div>
-            </div>
-          </Link>
+            ))}
+          </div>
         </section>
       </div>
     </AppShell>
   );
 }
+
+const SERVICES = [
+  {
+    icon: "radio",
+    title: "Diffusion radiophonique FM",
+    desc: "Une diffusion claire, fiable et qualitative pour les auditeurs. Notre expertise assure un rayonnement optimal de votre contenu sonore.",
+  },
+  {
+    icon: "videocam",
+    title: "Couverture médiatique audio-visuelle",
+    desc: "Couverture professionnelle et complète : sons, images, interviews et reportages engageants pour valoriser chaque moment clé de votre activité.",
+  },
+  {
+    icon: "share",
+    title: "Diffusion sur les réseaux sociaux",
+    desc: "Stratégies adaptées à vos objectifs et publics cibles pour assurer une présence et une visibilité optimales de votre activité en ligne.",
+  },
+  {
+    icon: "campaign",
+    title: "Événements & annonces",
+    desc: "Faites rayonner vos évènements grâce à notre expertise en communication audio-visuelle sur toutes nos plateformes.",
+  },
+];

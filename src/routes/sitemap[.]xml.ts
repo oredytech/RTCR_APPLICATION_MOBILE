@@ -10,7 +10,7 @@ export const Route = createFileRoute("/sitemap.xml")({
         const paths = ["/", "/live", "/discover", "/connect"];
         const urls = paths.map(
           (p) =>
-            `  <url><loc>${BASE_URL}${p}</loc><changefreq>weekly</changefreq></url>`,
+            `  <url><loc>${BASE_URL}${p}</loc><changefreq>daily</changefreq></url>`,
         );
         const xml = [
           `<?xml version="1.0" encoding="UTF-8"?>`,
