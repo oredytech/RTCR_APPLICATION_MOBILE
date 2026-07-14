@@ -56,15 +56,15 @@ function HomePage() {
             to="/live"
             className="group relative block h-56 w-full overflow-hidden rounded-2xl glass-card transition-transform active:scale-[0.98]"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-surface to-surface" />
-            <div className="absolute right-0 top-0 h-full w-1/2 opacity-30">
+            <div className="absolute inset-0 bg-white">
               <img
                 src={logoAsset.url}
-                alt=""
-                className="h-full w-full object-contain"
+                alt="Logo RTCR"
+                className="h-full w-full object-cover"
               />
             </div>
-            <div className="relative z-10 flex h-full flex-col justify-between p-5">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
+            <div className="relative z-10 flex h-full flex-col justify-between p-5 text-white">
               <div className="flex items-center gap-2">
                 <div className="flex h-4 items-end gap-1">
                   <span className="waveform-bar" style={{ animationDelay: "0.1s" }} />
@@ -72,16 +72,16 @@ function HomePage() {
                   <span className="waveform-bar" style={{ animationDelay: "0.2s" }} />
                   <span className="waveform-bar" style={{ animationDelay: "0.4s" }} />
                 </div>
-                <span className="text-xs font-semibold uppercase tracking-widest text-primary">
+                <span className="rounded-full bg-black/40 px-2 py-0.5 text-xs font-semibold uppercase tracking-widest">
                   Radio 96.0 Mhz · TV Canal 6
                 </span>
               </div>
               <div className="flex items-end justify-between">
                 <div>
-                  <h3 className="text-2xl font-bold leading-tight">
+                  <h3 className="text-2xl font-bold leading-tight drop-shadow">
                     Écoutez RTCR en direct
                   </h3>
-                  <p className="text-sm text-on-surface-variant">
+                  <p className="text-sm text-white/85 drop-shadow">
                     Lun–Ven 04h50–21h00 · en ligne 24h/7
                   </p>
                 </div>
@@ -110,11 +110,10 @@ function HomePage() {
           ) : (
             <div className="space-y-3">
               {top.map((a) => (
-                <a
+                <Link
                   key={a.slug}
-                  href={a.url}
-                  target="_blank"
-                  rel="noreferrer"
+                  to="/article/$slug"
+                  params={{ slug: a.key }}
                   className="group flex items-center gap-4 rounded-2xl p-3 glass-card transition-transform active:scale-[0.99]"
                 >
                   <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-surface-container-high">
@@ -139,7 +138,7 @@ function HomePage() {
                       {a.title}
                     </h4>
                   </div>
-                </a>
+                </Link>
               ))}
             </div>
           )}

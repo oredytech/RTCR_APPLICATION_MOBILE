@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
@@ -89,11 +89,10 @@ function DiscoverPage() {
             </p>
           )}
           {filtered.map((a) => (
-            <a
+            <Link
               key={a.slug}
-              href={a.url}
-              target="_blank"
-              rel="noreferrer"
+              to="/article/$slug"
+              params={{ slug: a.key }}
               className="group flex gap-4 overflow-hidden rounded-2xl p-3 glass-card transition-transform active:scale-[0.99]"
             >
               <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg bg-surface-container-high">
@@ -118,11 +117,11 @@ function DiscoverPage() {
                   {a.title}
                 </h3>
                 <div className="flex items-center gap-1 text-xs text-on-surface-variant">
-                  <Icon name="open_in_new" className="text-[14px]" />
-                  <span>Lire l'article</span>
+                  <Icon name="menu_book" className="text-[14px]" />
+                  <span>Lire dans l'application</span>
                 </div>
               </div>
-            </a>
+            </Link>
           ))}
         </section>
 
