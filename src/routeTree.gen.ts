@@ -9,16 +9,35 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as LiveRouteImport } from './routes/live'
 import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as ConnectRouteImport } from './routes/connect'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ArticleSlugRouteImport } from './routes/article.$slug'
 import { Route as ApiRssRouteImport } from './routes/api/rss'
 
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LiveRoute = LiveRouteImport.update({
@@ -41,6 +60,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ArticleSlugRoute = ArticleSlugRouteImport.update({
+  id: '/article/$slug',
+  path: '/article/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiRssRoute = ApiRssRouteImport.update({
   id: '/api/rss',
   path: '/api/rss',
@@ -52,16 +76,24 @@ export interface FileRoutesByFullPath {
   '/connect': typeof ConnectRoute
   '/discover': typeof DiscoverRoute
   '/live': typeof LiveRoute
+  '/privacy': typeof PrivacyRoute
+  '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms': typeof TermsRoute
   '/api/rss': typeof ApiRssRoute
+  '/article/$slug': typeof ArticleSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/connect': typeof ConnectRoute
   '/discover': typeof DiscoverRoute
   '/live': typeof LiveRoute
+  '/privacy': typeof PrivacyRoute
+  '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms': typeof TermsRoute
   '/api/rss': typeof ApiRssRoute
+  '/article/$slug': typeof ArticleSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -69,8 +101,12 @@ export interface FileRoutesById {
   '/connect': typeof ConnectRoute
   '/discover': typeof DiscoverRoute
   '/live': typeof LiveRoute
+  '/privacy': typeof PrivacyRoute
+  '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms': typeof TermsRoute
   '/api/rss': typeof ApiRssRoute
+  '/article/$slug': typeof ArticleSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -79,18 +115,36 @@ export interface FileRouteTypes {
     | '/connect'
     | '/discover'
     | '/live'
+    | '/privacy'
+    | '/settings'
     | '/sitemap.xml'
+    | '/terms'
     | '/api/rss'
+    | '/article/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/connect' | '/discover' | '/live' | '/sitemap.xml' | '/api/rss'
+  to:
+    | '/'
+    | '/connect'
+    | '/discover'
+    | '/live'
+    | '/privacy'
+    | '/settings'
+    | '/sitemap.xml'
+    | '/terms'
+    | '/api/rss'
+    | '/article/$slug'
   id:
     | '__root__'
     | '/'
     | '/connect'
     | '/discover'
     | '/live'
+    | '/privacy'
+    | '/settings'
     | '/sitemap.xml'
+    | '/terms'
     | '/api/rss'
+    | '/article/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -98,17 +152,42 @@ export interface RootRouteChildren {
   ConnectRoute: typeof ConnectRoute
   DiscoverRoute: typeof DiscoverRoute
   LiveRoute: typeof LiveRoute
+  PrivacyRoute: typeof PrivacyRoute
+  SettingsRoute: typeof SettingsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  TermsRoute: typeof TermsRoute
   ApiRssRoute: typeof ApiRssRoute
+  ArticleSlugRoute: typeof ArticleSlugRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/live': {
@@ -139,6 +218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/article/$slug': {
+      id: '/article/$slug'
+      path: '/article/$slug'
+      fullPath: '/article/$slug'
+      preLoaderRoute: typeof ArticleSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/rss': {
       id: '/api/rss'
       path: '/api/rss'
@@ -154,19 +240,13 @@ const rootRouteChildren: RootRouteChildren = {
   ConnectRoute: ConnectRoute,
   DiscoverRoute: DiscoverRoute,
   LiveRoute: LiveRoute,
+  PrivacyRoute: PrivacyRoute,
+  SettingsRoute: SettingsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  TermsRoute: TermsRoute,
   ApiRssRoute: ApiRssRoute,
+  ArticleSlugRoute: ArticleSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

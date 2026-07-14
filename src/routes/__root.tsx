@@ -11,6 +11,11 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { SettingsProvider } from "../lib/settings-context";
+import { RadioProvider } from "../lib/radio-context";
+
+const THEME_INIT_SCRIPT = `(() => { try { var s = localStorage.getItem('rtcr.settings.v1'); var t = s ? (JSON.parse(s).theme || 'light') : 'light'; var dark = t === 'dark' || (t === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches); var r = document.documentElement; r.classList.toggle('dark', dark); r.classList.toggle('light', !dark); } catch(e){} })();`;
+
 
 function NotFoundComponent() {
   return (
@@ -98,6 +103,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:locale", content: "fr_FR" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "theme-color", content: "#1a4bff" },
+      { name: "format-detection", content: "telephone=yes" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -124,9 +130,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="fr" className="dark">
+    <html lang="fr" className="light">
       <head>
         <HeadContent />
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body>
         {children}
@@ -140,7 +147,11 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <SettingsProvider>
+        <RadioProvider>
+          <Outlet />
+        </RadioProvider>
+      </SettingsProvider>
     </QueryClientProvider>
   );
 }
