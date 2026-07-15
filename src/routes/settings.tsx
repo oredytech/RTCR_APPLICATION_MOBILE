@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { AppShell } from "@/components/AppShell";
 import { Icon } from "@/components/Icon";
 import { ensureNotificationPermission, getNotificationPermission, showLocalNotification } from "@/lib/notification-manager";
@@ -31,7 +31,7 @@ function Row({
   icon: string;
   title: string;
   desc?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <div className="grid gap-3 rounded-xl p-3 sm:grid-cols-[auto_1fr_auto] sm:items-center">
