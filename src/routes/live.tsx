@@ -4,6 +4,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { Icon } from "@/components/Icon";
 import { TopBar } from "@/components/TopBar";
 import { useRadio } from "@/lib/radio-context";
+import { useSettings } from "@/lib/settings-context";
 
 export const Route = createFileRoute("/live")({
   head: () => ({
@@ -16,7 +17,8 @@ export const Route = createFileRoute("/live")({
 });
 
 function LivePage() {
-  const { playing, loading, error, toggle, volume, setVolume } = useRadio();
+  const { playing, loading, error, toggle, volume, setVolume, muted, setMuted, quality, setQuality } = useRadio();
+  const { settings, update } = useSettings();
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-on-surface">
@@ -89,18 +91,46 @@ function LivePage() {
             </a>
           </div>
 
-          <div className="flex items-center gap-4 rounded-xl border bg-surface-container-low p-4">
-            <Icon name="volume_down" className="text-on-surface-variant" />
-            <input
-              aria-label="Volume"
-              value={volume}
-              onChange={(e) => setVolume(Number(e.target.value))}
-              type="range"
-              min={0}
-              max={100}
-              className="h-1 flex-1 cursor-pointer appearance-none rounded-full bg-surface-container-highest accent-primary"
-            />
-            <Icon name="volume_up" className="text-on-surface-variant" />
+          <div className="space-y-4 rounded-xl border bg-surface-container-low p-4">
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => setMuted(!muted)}
+                aria-label={muted ? "Réactiver le son" : "Couper le son"}
+                className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-surface-container-high text-on-surface"
+              >
+                <Icon name={muted || volume === 0 ? "volume_off" : "volume_up"} />
+              </button>
+              <input
+                aria-label="Volume"
+                value={volume}
+                onChange={(e) => setVolume(Number(e.target.value))}
+                type="range"
+                min={0}
+                max={100}
+                className="h-1 flex-1 cursor-pointer appearance-none rounded-full bg-surface-container-highest accent-primary"
+              />
+              <span className="w-10 text-right text-xs font-semibold text-on-surface-variant">{muted ? "Muet" : `${volume}%`}</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {(["auto", "standard"] as const).map((q) => (
+                <button
+                  key={q}
+                  onClick={() => setQuality(q)}
+                  className={`rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-widest ${quality === q ? "bg-primary text-on-primary" : "bg-surface-container-high text-on-surface-variant"}`}
+                >
+                  {q === "auto" ? "Qualité auto" : "Standard"}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => update("autoReconnect", !settings.autoReconnect)}
+              className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-semibold ${settings.autoReconnect ? "bg-primary/15 text-primary" : "bg-surface-container-high text-on-surface-variant"}`}
+            >
+              <span>Reprise après perte de connexion</span>
+              <Icon name={settings.autoReconnect ? "toggle_on" : "toggle_off"} filled={settings.autoReconnect} />
+            </button>
           </div>
 
           <p className="text-center text-[11px] text-on-surface-variant">
