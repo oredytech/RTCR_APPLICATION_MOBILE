@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
+import { AppImage } from "@/components/AppImage";
 import { AppShell } from "@/components/AppShell";
 import { Icon } from "@/components/Icon";
 import { fetchArticle } from "@/lib/actualites.functions";
@@ -44,6 +45,7 @@ function ArticlePage() {
 
   const article = data ?? cachedArticle;
   const fromOfflineCache = Boolean(!data && cachedArticle);
+  const isInitialLoading = isLoading && !article && !cachedArticle;
 
   useEffect(() => {
     if (!article) return;
@@ -111,9 +113,9 @@ function ArticlePage() {
           </Link>
         </div>
 
-        {isLoading && !article && (
+        {isInitialLoading && (
           <div className="rounded-2xl p-6 glass-card text-sm text-on-surface-variant">
-            Ouverture de l'article…
+            Chargement des informations…
           </div>
         )}
         {error && !article && (
@@ -131,7 +133,7 @@ function ArticlePage() {
               </div>
             )}
             {article.image && (
-              <img
+              <AppImage
                 src={article.image}
                 alt={article.title}
                 className="w-full rounded-2xl object-cover"
@@ -142,7 +144,7 @@ function ArticlePage() {
               <span className="text-[10px] font-semibold uppercase tracking-widest text-secondary">
                 rtcr.net · Actualité
               </span>
-              <h1 className="text-3xl font-bold leading-tight">{article.title}</h1>
+              <h1 className="break-words text-3xl font-bold leading-tight">{article.title}</h1>
             </div>
 
             <div className="flex flex-wrap items-center gap-2 rounded-2xl p-2 glass-card">
@@ -154,6 +156,15 @@ function ArticlePage() {
                 <Icon name={isSaved ? "bookmark_added" : "bookmark_add"} className="text-[20px]" />
                 {isSaved ? "Sauvegardé" : "Sauvegarder hors-ligne"}
               </button>
+              <a
+                href={article.url}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl bg-surface-container-high px-3 py-2 text-sm font-semibold text-on-surface"
+              >
+                <Icon name="open_in_new" className="text-[20px]" />
+                Voir sur le site
+              </a>
               <Link
                 to="/settings"
                 className="inline-flex items-center gap-2 rounded-xl bg-surface-container-high px-3 py-2 text-sm font-semibold text-on-surface"

@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import logoAsset from "@/assets/logo_rtcr.webp.asset.json";
+import { AppImage } from "@/components/AppImage";
 import { AppShell } from "@/components/AppShell";
 import { Icon } from "@/components/Icon";
+import { rtcrLogoSrc } from "@/lib/assets";
 import { fetchActualites } from "@/lib/actualites.functions";
 
 export const Route = createFileRoute("/")({
@@ -57,8 +58,8 @@ function HomePage() {
             className="group relative block h-56 w-full overflow-hidden rounded-2xl glass-card transition-transform active:scale-[0.98]"
           >
             <div className="absolute inset-0 bg-white">
-              <img
-                src={logoAsset.url}
+              <AppImage
+                src={rtcrLogoSrc}
                 alt="Logo RTCR"
                 className="h-full w-full object-cover"
               />
@@ -110,15 +111,16 @@ function HomePage() {
           ) : (
             <div className="space-y-3">
               {top.map((a) => (
-                <Link
+                <a
                   key={a.slug}
-                  to="/article/$slug"
-                  params={{ slug: a.key }}
+                  href={a.url}
+                  target="_blank"
+                  rel="noreferrer"
                   className="group flex items-center gap-4 rounded-2xl p-3 glass-card transition-transform active:scale-[0.99]"
                 >
                   <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-surface-container-high">
                     {a.image ? (
-                      <img
+                      <AppImage
                         alt=""
                         className="h-full w-full object-cover transition-transform group-hover:scale-105"
                         src={a.image}
@@ -138,7 +140,7 @@ function HomePage() {
                       {a.title}
                     </h4>
                   </div>
-                </Link>
+                </a>
               ))}
             </div>
           )}

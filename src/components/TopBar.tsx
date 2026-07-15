@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import logoAsset from "@/assets/logo_rtcr.webp.asset.json";
+import { rtcrLogoSrc } from "@/lib/assets";
+import { AppImage } from "./AppImage";
 import { Icon } from "./Icon";
 
 export function TopBar({
@@ -15,7 +16,7 @@ export function TopBar({
     <header className="fixed left-0 right-0 top-0 z-50 flex h-16 items-center justify-between border-b bg-surface/80 px-5 backdrop-blur-xl">
       <Link to="/" className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-white p-0.5">
-          <img src={logoAsset.url} alt="Logo RTCR" className="h-full w-full object-contain" />
+          <AppImage src={rtcrLogoSrc} alt="Logo RTCR" className="h-full w-full object-contain" />
         </div>
         <div className="flex flex-col leading-tight">
           <span className="font-headline text-lg font-extrabold tracking-tight text-primary">
@@ -43,7 +44,7 @@ export function TopBar({
         </Link>
         {showAvatar && (
           <div className="ml-1 h-8 w-8 overflow-hidden rounded-lg border bg-white">
-            <img alt="RTCR" className="h-full w-full object-contain" src={logoAsset.url} />
+            <AppImage alt="RTCR" className="h-full w-full object-contain" src={rtcrLogoSrc} />
           </div>
         )}
       </div>

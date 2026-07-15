@@ -7,7 +7,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -145,6 +145,34 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const [isBooting, setIsBooting] = useState(true);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setIsBooting(false), 800);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  if (isBooting) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <div className="flex w-full max-w-sm flex-col items-center text-center">
+          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-primary/15 text-primary shadow-[0_0_30px_rgba(26,75,255,0.15)]">
+            <span className="text-4xl font-black tracking-tight">RT</span>
+          </div>
+          <div className="mb-4 h-2 w-32 overflow-hidden rounded-full bg-surface-container-high">
+            <div className="h-full w-1/2 animate-[pulse_1.2s_ease-in-out_infinite] rounded-full bg-primary" />
+          </div>
+          <h1 className="text-xl font-semibold tracking-tight text-on-surface">
+            Chargement de RTCR…
+          </h1>
+          <p className="mt-2 text-sm text-on-surface-variant">
+            Préparation de l’application et de vos contenus.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <SettingsProvider>
