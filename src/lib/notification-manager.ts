@@ -57,8 +57,10 @@ export function showLocalNotification(title: string, body: string, url = "/") {
   if (Notification.permission !== "granted") return;
   const notification = new Notification(title, {
     body,
-    icon: "/icons/icon-192.png",
+    icon: "/icons/maskable-192.png",
     badge: "/icons/icon-192.png",
+    tag: "rtcr-local",
+    renotify: true,
     data: { url },
   });
   notification.onclick = () => {

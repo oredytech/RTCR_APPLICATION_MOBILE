@@ -102,7 +102,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { property: "og:locale", content: "fr_FR" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "theme-color", content: "#1a4bff" },
+      { name: "theme-color", content: "#1a4bff", media: "(prefers-color-scheme: light)" },
+      { name: "theme-color", content: "#090b12", media: "(prefers-color-scheme: dark)" },
       { name: "format-detection", content: "telephone=yes" },
     ],
     links: [
