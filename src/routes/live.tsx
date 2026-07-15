@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import logoAsset from "@/assets/logo_rtcr.webp.asset.json";
+import { AppImage } from "@/components/AppImage";
 import { BottomNav } from "@/components/BottomNav";
 import { Icon } from "@/components/Icon";
+import { rtcrLogoSrc } from "@/lib/assets";
 import { TopBar } from "@/components/TopBar";
 import { useRadio } from "@/lib/radio-context";
 import { useSettings } from "@/lib/settings-context";
@@ -28,7 +29,7 @@ function LivePage() {
         <div className="group relative mb-8 aspect-square w-full max-w-[340px]">
           <div className="absolute -inset-2 rounded-2xl bg-primary/25 opacity-60 blur-2xl transition-opacity group-hover:opacity-90" />
           <div className="relative h-full w-full overflow-hidden rounded-2xl bg-white glass-panel">
-            <img alt="Logo RTCR" className="h-full w-full object-contain p-6" src={logoAsset.url} />
+            <AppImage alt="Logo RTCR" className="h-full w-full object-contain p-6" src={rtcrLogoSrc} />
             <div className="absolute left-4 top-4 flex items-center gap-2 rounded-xl bg-secondary px-3 py-1">
               <span className="h-2 w-2 animate-pulse rounded-full bg-white" />
               <span className="text-[10px] font-bold uppercase tracking-widest text-white">En direct</span>

@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { AppImage } from "@/components/AppImage";
 import { AppShell } from "@/components/AppShell";
 import { Icon } from "@/components/Icon";
 import {
@@ -111,7 +112,7 @@ function ArticleRow({ item, date, label }: { item: ReadingHistoryItem | SavedArt
   return (
     <Link to="/article/$slug" params={{ slug: item.slug }} className="group flex gap-3 rounded-2xl p-3 glass-card transition-transform active:scale-[0.99]">
       <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-surface-container-high">
-        {item.image ? <img src={item.image} alt="" className="h-full w-full object-cover" loading="lazy" /> : <div className="flex h-full w-full items-center justify-center text-on-surface-variant"><Icon name="newspaper" /></div>}
+        {item.image ? <AppImage src={item.image} alt="" className="h-full w-full object-cover" loading="lazy" /> : <div className="flex h-full w-full items-center justify-center text-on-surface-variant"><Icon name="newspaper" /></div>}
       </div>
       <div className="min-w-0 flex-1">
         <span className="text-[10px] font-semibold uppercase tracking-widest text-secondary">{label} · {formatDate(date)}</span>

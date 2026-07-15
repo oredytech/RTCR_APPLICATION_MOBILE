@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
+import { AppImage } from "@/components/AppImage";
 import { AppShell } from "@/components/AppShell";
 import { Icon } from "@/components/Icon";
 import { fetchActualites } from "@/lib/actualites.functions";
@@ -89,15 +90,16 @@ function DiscoverPage() {
             </p>
           )}
           {filtered.map((a) => (
-            <Link
+            <a
               key={a.slug}
-              to="/article/$slug"
-              params={{ slug: a.key }}
+              href={a.url}
+              target="_blank"
+              rel="noreferrer"
               className="group flex gap-4 overflow-hidden rounded-2xl p-3 glass-card transition-transform active:scale-[0.99]"
             >
               <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg bg-surface-container-high">
                 {a.image ? (
-                  <img
+                  <AppImage
                     alt=""
                     loading="lazy"
                     className="h-full w-full object-cover transition-transform group-hover:scale-105"
@@ -121,7 +123,7 @@ function DiscoverPage() {
                   <span>Lire dans l'application</span>
                 </div>
               </div>
-            </Link>
+            </a>
           ))}
         </section>
 

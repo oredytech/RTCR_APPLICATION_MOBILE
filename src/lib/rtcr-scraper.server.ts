@@ -55,19 +55,22 @@ function keyFromSlugPath(slugPath: string) {
   try { return decodeURIComponent(last); } catch { return last; }
 }
 
-export function toRss(items: Actualite[]): string {
+export function toRss(items: Actualite[], appBaseUrl?: string): string {
   const now = new Date().toUTCString();
   const entries = items
-    .map(
-      (a) => `    <item>
+    .map((a) => {
+      const articleUrl = appBaseUrl
+        ? new URL(`/article/${encodeURIComponent(a.key)}`, appBaseUrl).toString()
+        : a.url;
+      return `    <item>
       <title>${xmlEscape(a.title)}</title>
-      <link>${xmlEscape(a.url)}</link>
-      <guid isPermaLink="true">${xmlEscape(a.url)}</guid>
+      <link>${xmlEscape(articleUrl)}</link>
+      <guid isPermaLink="true">${xmlEscape(articleUrl)}</guid>
       <pubDate>${new Date(a.pubDate).toUTCString()}</pubDate>
       ${a.image ? `<enclosure url="${xmlEscape(a.image)}" type="image/jpeg" />` : ""}
       <description>${xmlEscape(a.title)}</description>
-    </item>`,
-    )
+    </item>`;
+    })
     .join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">

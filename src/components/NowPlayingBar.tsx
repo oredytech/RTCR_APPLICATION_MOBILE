@@ -1,5 +1,6 @@
-import logoAsset from "@/assets/logo_rtcr.webp.asset.json";
 import { useRadio } from "@/lib/radio-context";
+import { rtcrLogoSrc } from "@/lib/assets";
+import { AppImage } from "./AppImage";
 import { Icon } from "./Icon";
 
 export function NowPlayingBar() {
@@ -7,7 +8,7 @@ export function NowPlayingBar() {
   return (
     <div className="fixed bottom-24 left-4 right-4 z-40 mx-auto flex h-16 max-w-2xl items-center gap-3 rounded-2xl border bg-surface-container/90 px-3 shadow-xl backdrop-blur-2xl">
       <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-lg bg-white p-0.5">
-        <img alt="RTCR" className="h-full w-full object-contain" src={logoAsset.url} />
+        <AppImage alt="RTCR" className="h-full w-full object-contain" src={rtcrLogoSrc} />
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-bold text-on-surface">RTCR — 96.0 Mhz</p>
