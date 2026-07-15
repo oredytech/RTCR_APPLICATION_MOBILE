@@ -153,6 +153,9 @@ function stripDangerous(html: string): string {
 }
 
 function extractArticleBody(html: string): string {
+  const contentDiv = extractBalancedDivByClass(html, "contentDiv");
+  if (contentDiv && contentDiv.length > 150) return contentDiv;
+
   // Try common containers used by the site builder.
   const candidates = [
     /<article[^>]*>([\s\S]*?)<\/article>/i,
@@ -166,6 +169,24 @@ function extractArticleBody(html: string): string {
   // Fallback: grab everything between the title and the footer.
   const m = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
   return m?.[1] ?? html;
+}
+
+function extractBalancedDivByClass(html: string, className: string): string | null {
+  const startRe = new RegExp(`<div[^>]*class=["'][^"']*${className}[^"']*["'][^>]*>`, "i");
+  const startMatch = html.match(startRe);
+  if (!startMatch || startMatch.index === undefined) return null;
+
+  let cursor = startMatch.index + startMatch[0].length;
+  let depth = 1;
+  const tagRe = /<\/div\s*>|<div\b[^>]*>/gi;
+  tagRe.lastIndex = cursor;
+  for (let match = tagRe.exec(html); match; match = tagRe.exec(html)) {
+    if (match[0].toLowerCase().startsWith("</div")) depth -= 1;
+    else depth += 1;
+    if (depth === 0) return html.slice(cursor, match.index);
+    cursor = tagRe.lastIndex;
+  }
+  return null;
 }
 
 function promoteLazyImages(html: string): string {

@@ -16,60 +16,51 @@ type Ctx = {
   playing: boolean;
   loading: boolean;
   volume: number;
+  muted: boolean;
+  quality: "auto" | "standard";
   error: string | null;
   toggle: () => void;
   play: () => void;
   pause: () => void;
   setVolume: (v: number) => void;
+  setMuted: (v: boolean) => void;
+  setQuality: (v: "auto" | "standard") => void;
 };
 
 const RadioContext = createContext<Ctx | null>(null);
 
 export function RadioProvider({ children }: { children: ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const reconnectTimerRef = useRef<number | null>(null);
+  const autoReconnectRef = useRef(false);
   const [playing, setPlaying] = useState(false);
   const [loading, setLoading] = useState(false);
   const [volume, setVolumeState] = useState(70);
+  const [muted, setMutedState] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { settings } = useSettings();
+  const { settings, update } = useSettings();
 
-  // Create audio element lazily on client.
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const a = new Audio(STREAM_URL);
-    a.preload = "none";
-    a.crossOrigin = "anonymous";
-    a.volume = volume / 100;
-    audioRef.current = a;
-    const onPlay = () => { setPlaying(true); setLoading(false); };
-    const onPause = () => setPlaying(false);
-    const onWaiting = () => setLoading(true);
-    const onPlaying = () => { setLoading(false); setError(null); };
-    const onError = () => { setError("Lecture impossible. Vérifiez votre connexion."); setLoading(false); setPlaying(false); };
-    a.addEventListener("play", onPlay);
-    a.addEventListener("pause", onPause);
-    a.addEventListener("waiting", onWaiting);
-    a.addEventListener("playing", onPlaying);
-    a.addEventListener("error", onError);
-    return () => {
-      a.pause();
-      a.removeEventListener("play", onPlay);
-      a.removeEventListener("pause", onPause);
-      a.removeEventListener("waiting", onWaiting);
-      a.removeEventListener("playing", onPlaying);
-      a.removeEventListener("error", onError);
-      audioRef.current = null;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    autoReconnectRef.current = settings.autoReconnect;
+  }, [settings.autoReconnect]);
 
   useEffect(() => {
     if (audioRef.current) audioRef.current.volume = volume / 100;
   }, [volume]);
 
+  useEffect(() => {
+    setVolumeState(settings.radioVolume);
+    setMutedState(settings.radioMuted);
+  }, [settings.radioMuted, settings.radioVolume]);
+
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.muted = muted;
+  }, [muted]);
+
   const play = useCallback(() => {
     const a = audioRef.current;
     if (!a) return;
+    if (reconnectTimerRef.current) window.clearTimeout(reconnectTimerRef.current);
     setLoading(true);
     setError(null);
     a.src = STREAM_URL + "?t=" + Date.now();
@@ -79,7 +70,61 @@ export function RadioProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const scheduleReconnect = useCallback(() => {
+    if (typeof window === "undefined") return;
+    if (reconnectTimerRef.current) window.clearTimeout(reconnectTimerRef.current);
+    reconnectTimerRef.current = window.setTimeout(() => {
+      reconnectTimerRef.current = null;
+      if (autoReconnectRef.current) play();
+    }, 5000);
+  }, [play]);
+
+  // Create audio element lazily on client.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const a = new Audio(STREAM_URL);
+    a.preload = "none";
+    a.crossOrigin = "anonymous";
+    a.volume = volume / 100;
+    a.muted = muted;
+    audioRef.current = a;
+    const onPlay = () => { setPlaying(true); setLoading(false); };
+    const onPause = () => setPlaying(false);
+    const onWaiting = () => setLoading(true);
+    const onPlaying = () => { setLoading(false); setError(null); };
+    const onStalled = () => {
+      if (!autoReconnectRef.current) return;
+      setError("Connexion instable. Reprise automatique…");
+      scheduleReconnect();
+    };
+    const onError = () => {
+      const canReconnect = autoReconnectRef.current;
+      setError(canReconnect ? "Connexion perdue. Reprise automatique…" : "Lecture impossible. Vérifiez votre connexion.");
+      setLoading(false);
+      setPlaying(false);
+      if (canReconnect) scheduleReconnect();
+    };
+    a.addEventListener("play", onPlay);
+    a.addEventListener("pause", onPause);
+    a.addEventListener("waiting", onWaiting);
+    a.addEventListener("playing", onPlaying);
+    a.addEventListener("stalled", onStalled);
+    a.addEventListener("error", onError);
+    return () => {
+      a.pause();
+      if (reconnectTimerRef.current) window.clearTimeout(reconnectTimerRef.current);
+      a.removeEventListener("play", onPlay);
+      a.removeEventListener("pause", onPause);
+      a.removeEventListener("waiting", onWaiting);
+      a.removeEventListener("playing", onPlaying);
+      a.removeEventListener("stalled", onStalled);
+      a.removeEventListener("error", onError);
+      audioRef.current = null;
+    };
+  }, [scheduleReconnect]);
+
   const pause = useCallback(() => {
+    if (reconnectTimerRef.current) window.clearTimeout(reconnectTimerRef.current);
     audioRef.current?.pause();
   }, []);
 
@@ -97,11 +142,32 @@ export function RadioProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings.autoplayRadio]);
 
-  const setVolume = useCallback((v: number) => setVolumeState(Math.max(0, Math.min(100, v))), []);
+  const setVolume = useCallback((v: number) => {
+    const next = Math.max(0, Math.min(100, v));
+    setVolumeState(next);
+    update("radioVolume", next);
+    if (next > 0 && muted) {
+      setMutedState(false);
+      update("radioMuted", false);
+    }
+  }, [muted, update]);
+
+  const setMuted = useCallback((v: boolean) => {
+    setMutedState(v);
+    update("radioMuted", v);
+  }, [update]);
+
+  const setQuality = useCallback((v: "auto" | "standard") => {
+    update("radioQuality", v);
+    if (playing) {
+      pause();
+      setTimeout(play, 100);
+    }
+  }, [pause, play, playing, update]);
 
   const value = useMemo(
-    () => ({ playing, loading, volume, error, toggle, play, pause, setVolume }),
-    [playing, loading, volume, error, toggle, play, pause, setVolume],
+    () => ({ playing, loading, volume, muted, quality: settings.radioQuality, error, toggle, play, pause, setVolume, setMuted, setQuality }),
+    [playing, loading, volume, muted, settings.radioQuality, error, toggle, play, pause, setVolume, setMuted, setQuality],
   );
 
   return <RadioContext.Provider value={value}>{children}</RadioContext.Provider>;

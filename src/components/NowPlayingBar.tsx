@@ -3,7 +3,7 @@ import { useRadio } from "@/lib/radio-context";
 import { Icon } from "./Icon";
 
 export function NowPlayingBar() {
-  const { playing, loading, toggle } = useRadio();
+  const { playing, loading, toggle, muted, setMuted, volume } = useRadio();
   return (
     <div className="fixed bottom-24 left-4 right-4 z-40 mx-auto flex h-16 max-w-2xl items-center gap-3 rounded-2xl border bg-surface-container/90 px-3 shadow-xl backdrop-blur-2xl">
       <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-lg bg-white p-0.5">
@@ -26,13 +26,22 @@ export function NowPlayingBar() {
           </span>
         </div>
       </div>
-      <button
-        onClick={toggle}
-        className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-on-primary shadow-[0_0_20px_rgba(26,75,255,0.4)] transition-transform active:scale-90"
-        aria-label={playing ? "Pause" : "Lecture"}
-      >
-        <Icon name={playing ? "pause" : "play_arrow"} filled />
-      </button>
+      <div className="flex flex-shrink-0 items-center gap-2">
+        <button
+          onClick={() => setMuted(!muted)}
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container-high text-on-surface transition-transform active:scale-90"
+          aria-label={muted ? "Réactiver le son" : "Couper le son"}
+        >
+          <Icon name={muted || volume === 0 ? "volume_off" : "volume_up"} />
+        </button>
+        <button
+          onClick={toggle}
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-on-primary shadow-[0_0_20px_rgba(26,75,255,0.4)] transition-transform active:scale-90"
+          aria-label={playing ? "Pause" : "Lecture"}
+        >
+          <Icon name={playing ? "pause" : "play_arrow"} filled />
+        </button>
+      </div>
     </div>
   );
 }
