@@ -9,12 +9,23 @@ import {
 } from "react";
 
 export type Theme = "light" | "dark" | "system";
+export type RadioQuality = "auto" | "standard";
+export type ArticleFontSize = "small" | "normal" | "large" | "xlarge";
+export type ArticleTheme = "default" | "light" | "sepia" | "dark";
+export type ArticleColumn = "compact" | "comfortable" | "wide";
 
 export type Settings = {
   theme: Theme;
   notifications: boolean;
   breakingAlerts: boolean;
+  notifyLive: boolean;
+  notifyPrograms: boolean;
+  notifyCommunity: boolean;
   autoplayRadio: boolean;
+  autoReconnect: boolean;
+  radioQuality: RadioQuality;
+  radioMuted: boolean;
+  radioVolume: number;
   dataSaver: boolean;
   language: "fr";
   cookiesAnalytics: boolean;
@@ -23,13 +34,23 @@ export type Settings = {
   alarmEnabled: boolean;
   alarmTime: string; // HH:MM
   reduceMotion: boolean;
+  articleFontSize: ArticleFontSize;
+  articleTheme: ArticleTheme;
+  articleColumn: ArticleColumn;
 };
 
 const DEFAULTS: Settings = {
   theme: "light",
   notifications: false,
   breakingAlerts: true,
+  notifyLive: true,
+  notifyPrograms: false,
+  notifyCommunity: true,
   autoplayRadio: false,
+  autoReconnect: true,
+  radioQuality: "auto",
+  radioMuted: false,
+  radioVolume: 70,
   dataSaver: false,
   language: "fr",
   cookiesAnalytics: false,
@@ -38,6 +59,9 @@ const DEFAULTS: Settings = {
   alarmEnabled: false,
   alarmTime: "06:30",
   reduceMotion: false,
+  articleFontSize: "normal",
+  articleTheme: "default",
+  articleColumn: "comfortable",
 };
 
 const KEY = "rtcr.settings.v1";
@@ -61,6 +85,11 @@ function applyTheme(theme: Theme) {
   root.classList.toggle("light", !wantDark);
 }
 
+function applyMotionPreference(reduceMotion: boolean) {
+  if (typeof document === "undefined") return;
+  document.documentElement.classList.toggle("reduce-motion", reduceMotion);
+}
+
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<Settings>(DEFAULTS);
 
@@ -72,11 +101,14 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         const parsed = { ...DEFAULTS, ...JSON.parse(raw) } as Settings;
         setSettings(parsed);
         applyTheme(parsed.theme);
+        applyMotionPreference(parsed.reduceMotion);
       } else {
         applyTheme(DEFAULTS.theme);
+        applyMotionPreference(DEFAULTS.reduceMotion);
       }
     } catch {
       applyTheme(DEFAULTS.theme);
+      applyMotionPreference(DEFAULTS.reduceMotion);
     }
   }, []);
 
@@ -97,6 +129,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           localStorage.setItem(KEY, JSON.stringify(next));
         } catch {}
         if (k === "theme") applyTheme(v as Theme);
+        if (k === "reduceMotion") applyMotionPreference(Boolean(v));
         return next;
       });
     },
@@ -109,6 +142,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     } catch {}
     setSettings(DEFAULTS);
     applyTheme(DEFAULTS.theme);
+    applyMotionPreference(DEFAULTS.reduceMotion);
   }, []);
 
   const value = useMemo(() => ({ settings, update, reset }), [settings, update, reset]);
