@@ -108,7 +108,24 @@ function DiscoverPage() {
           </button>
         </div>
 
+        <AdBanner />
+
+        <Link
+          to="/podcasts"
+          className="flex items-center gap-3 rounded-2xl p-4 glass-card transition-transform active:scale-[0.99]"
+        >
+          <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-secondary/15 text-secondary">
+            <Icon name="podcasts" filled />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-secondary">Nouveau</p>
+            <h3 className="font-bold">Écouter les podcasts RTCR</h3>
+          </div>
+          <Icon name="chevron_right" className="text-on-surface-variant" />
+        </Link>
+
         <section className="space-y-3">
+
           {isLoading && (
             <p className="rounded-2xl p-4 glass-card text-sm text-on-surface-variant">
               Récupération des articles en cours…
