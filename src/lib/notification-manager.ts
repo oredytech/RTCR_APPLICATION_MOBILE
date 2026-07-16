@@ -60,7 +60,6 @@ export function showLocalNotification(title: string, body: string, url = "/") {
     icon: "/icons/maskable-192.png",
     badge: "/icons/icon-192.png",
     tag: "rtcr-local",
-    renotify: true,
     data: { url },
   });
   notification.onclick = () => {
