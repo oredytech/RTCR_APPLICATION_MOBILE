@@ -13,6 +13,7 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PodcastsRouteImport } from './routes/podcasts'
 import { Route as LiveRouteImport } from './routes/live'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as DiscoverRouteImport } from './routes/discover'
@@ -40,6 +41,11 @@ const SettingsRoute = SettingsRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PodcastsRoute = PodcastsRouteImport.update({
+  id: '/podcasts',
+  path: '/podcasts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LiveRoute = LiveRouteImport.update({
@@ -90,6 +96,7 @@ export interface FileRoutesByFullPath {
   '/discover': typeof DiscoverRoute
   '/history': typeof HistoryRoute
   '/live': typeof LiveRoute
+  '/podcasts': typeof PodcastsRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -104,6 +111,7 @@ export interface FileRoutesByTo {
   '/discover': typeof DiscoverRoute
   '/history': typeof HistoryRoute
   '/live': typeof LiveRoute
+  '/podcasts': typeof PodcastsRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -119,6 +127,7 @@ export interface FileRoutesById {
   '/discover': typeof DiscoverRoute
   '/history': typeof HistoryRoute
   '/live': typeof LiveRoute
+  '/podcasts': typeof PodcastsRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -135,6 +144,7 @@ export interface FileRouteTypes {
     | '/discover'
     | '/history'
     | '/live'
+    | '/podcasts'
     | '/privacy'
     | '/settings'
     | '/sitemap.xml'
@@ -149,6 +159,7 @@ export interface FileRouteTypes {
     | '/discover'
     | '/history'
     | '/live'
+    | '/podcasts'
     | '/privacy'
     | '/settings'
     | '/sitemap.xml'
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | '/discover'
     | '/history'
     | '/live'
+    | '/podcasts'
     | '/privacy'
     | '/settings'
     | '/sitemap.xml'
@@ -178,6 +190,7 @@ export interface RootRouteChildren {
   DiscoverRoute: typeof DiscoverRoute
   HistoryRoute: typeof HistoryRoute
   LiveRoute: typeof LiveRoute
+  PodcastsRoute: typeof PodcastsRoute
   PrivacyRoute: typeof PrivacyRoute
   SettingsRoute: typeof SettingsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -214,6 +227,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/podcasts': {
+      id: '/podcasts'
+      path: '/podcasts'
+      fullPath: '/podcasts'
+      preLoaderRoute: typeof PodcastsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/live': {
@@ -282,6 +302,7 @@ const rootRouteChildren: RootRouteChildren = {
   DiscoverRoute: DiscoverRoute,
   HistoryRoute: HistoryRoute,
   LiveRoute: LiveRoute,
+  PodcastsRoute: PodcastsRoute,
   PrivacyRoute: PrivacyRoute,
   SettingsRoute: SettingsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,

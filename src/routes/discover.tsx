@@ -6,6 +6,36 @@ import { AppShell } from "@/components/AppShell";
 import { Icon } from "@/components/Icon";
 import { fetchActualites } from "@/lib/actualites.functions";
 
+function AdBanner() {
+  return (
+    <a
+      href="/connect"
+      className="relative block overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-primary via-primary/80 to-secondary p-5 text-white shadow-lg transition-transform active:scale-[0.99]"
+    >
+      <span className="absolute right-3 top-3 rounded-full bg-white/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest">
+        Publicité
+      </span>
+      <div className="flex items-center gap-4">
+        <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl bg-white/15 backdrop-blur-md">
+          <Icon name="campaign" filled className="text-[28px]" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/80">
+            Espace annonceur
+          </p>
+          <h3 className="text-lg font-bold leading-tight">
+            Faites rayonner votre marque sur RTCR
+          </h3>
+          <p className="mt-1 text-xs text-white/85">
+            Contactez la régie pour réserver cet espace.
+          </p>
+        </div>
+      </div>
+    </a>
+  );
+}
+
+
 export const Route = createFileRoute("/discover")({
   head: () => ({
     meta: [
