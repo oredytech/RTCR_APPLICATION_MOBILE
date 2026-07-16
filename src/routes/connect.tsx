@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { AppShell } from "@/components/AppShell";
 import { Icon } from "@/components/Icon";
+import { SocialLinks } from "@/components/SocialLinks";
+import { WhatsAppComposer } from "@/components/WhatsAppComposer";
 
 export const Route = createFileRoute("/connect")({
   head: () => ({
@@ -22,8 +24,8 @@ const CONTACTS: Array<{ icon: string; label: string; value: string; href?: strin
   {
     icon: "call",
     label: "Téléphone",
-    value: "+243 812 875 481",
-    href: "tel:+243812875481",
+    value: "+243 994 700 510",
+    href: "tel:+243994700510",
   },
   {
     icon: "call",
@@ -36,6 +38,12 @@ const CONTACTS: Array<{ icon: string; label: string; value: string; href?: strin
     label: "E-mail",
     value: "r_tv_la_reference96mhz@yahoo.com",
     href: "mailto:r_tv_la_reference96mhz@yahoo.com",
+  },
+  {
+    icon: "mail",
+    label: "E-mail (bis)",
+    value: "rtvlareference@gmail.com",
+    href: "mailto:rtvlareference@gmail.com",
   },
   {
     icon: "schedule",
@@ -73,9 +81,13 @@ function ConnectPage() {
             </Link>
           </div>
           <p className="text-on-surface-variant">
-            Vous souhaitez prendre contact avec RTCR ? Utilisez nos coordonnées ou envoyez-nous un message directement.
+            Vous souhaitez prendre contact avec RTCR ? Utilisez nos coordonnées, WhatsApp ou envoyez-nous un message.
           </p>
         </section>
+
+        <WhatsAppComposer />
+
+        <SocialLinks />
 
         <section className="space-y-4">
           <h2 className="text-2xl font-bold">Contacts</h2>
@@ -110,7 +122,7 @@ function ConnectPage() {
             })}
           </div>
           <a
-            href="tel:+243812875481"
+            href="tel:+243994700510"
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-4 font-semibold text-on-primary transition-opacity active:opacity-90"
           >
             <Icon name="call" />

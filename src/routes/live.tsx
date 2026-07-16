@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AppImage } from "@/components/AppImage";
 import { BottomNav } from "@/components/BottomNav";
 import { Icon } from "@/components/Icon";
+import { LiveChat } from "@/components/LiveChat";
 import { rtcrLogoSrc } from "@/lib/assets";
 import { TopBar } from "@/components/TopBar";
 import { useRadio } from "@/lib/radio-context";
@@ -18,8 +19,9 @@ export const Route = createFileRoute("/live")({
 });
 
 function LivePage() {
-  const { playing, loading, error, toggle, volume, setVolume, muted, setMuted, quality, setQuality } = useRadio();
+  const { playing, loading, error, toggle, pause, volume, setVolume, muted, setMuted, quality, setQuality } = useRadio();
   const { settings, update } = useSettings();
+  const isLive = playing || loading;
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-on-surface">
@@ -30,9 +32,23 @@ function LivePage() {
           <div className="absolute -inset-2 rounded-2xl bg-primary/25 opacity-60 blur-2xl transition-opacity group-hover:opacity-90" />
           <div className="relative h-full w-full overflow-hidden rounded-2xl bg-white glass-panel">
             <AppImage alt="Logo RTCR" className="h-full w-full object-contain p-6" src={rtcrLogoSrc} />
-            <div className="absolute left-4 top-4 flex items-center gap-2 rounded-xl bg-secondary px-3 py-1">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-white" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-white">En direct</span>
+            <div
+              className={`absolute left-4 top-4 flex items-center gap-2 rounded-xl px-3 py-1 transition-colors ${
+                isLive ? "bg-secondary" : "bg-white/95"
+              }`}
+            >
+              <span
+                className={`h-2 w-2 rounded-full ${
+                  isLive ? "animate-pulse bg-white" : "bg-secondary"
+                }`}
+              />
+              <span
+                className={`text-[10px] font-bold uppercase tracking-widest ${
+                  isLive ? "text-white" : "text-secondary"
+                }`}
+              >
+                En direct
+              </span>
             </div>
           </div>
         </div>
@@ -77,7 +93,7 @@ function LivePage() {
           )}
 
           <div className="flex items-center justify-around px-2">
-            <a href="tel:+243812875481" aria-label="Appeler la station" className="text-on-surface-variant transition-transform hover:text-primary active:scale-90">
+            <a href="tel:+243994700510" aria-label="Appeler la station" className="text-on-surface-variant transition-transform hover:text-primary active:scale-90">
               <Icon name="call" className="text-[28px]" />
             </a>
             <button
@@ -86,6 +102,14 @@ function LivePage() {
               aria-label={playing ? "Pause" : "Lecture"}
             >
               <Icon name={loading ? "hourglass_empty" : playing ? "pause" : "play_arrow"} filled className="text-[44px]" />
+            </button>
+            <button
+              onClick={pause}
+              disabled={!isLive}
+              className="flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary text-white transition-transform active:scale-95 disabled:opacity-40"
+              aria-label="Arrêter la lecture"
+            >
+              <Icon name="stop" filled className="text-[32px]" />
             </button>
             <a href="mailto:r_tv_la_reference96mhz@yahoo.com" aria-label="Envoyer un e-mail" className="text-on-surface-variant transition-transform hover:text-primary active:scale-90">
               <Icon name="mail" className="text-[28px]" />
@@ -133,6 +157,8 @@ function LivePage() {
               <Icon name={settings.autoReconnect ? "toggle_on" : "toggle_off"} filled={settings.autoReconnect} />
             </button>
           </div>
+
+          <LiveChat />
 
           <p className="text-center text-[11px] text-on-surface-variant">
             Flux radio en direct fourni par Zeno.FM · stream.zeno.fm/cgxrxyyhjsrtv
