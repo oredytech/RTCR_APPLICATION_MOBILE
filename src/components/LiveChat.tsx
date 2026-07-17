@@ -12,6 +12,32 @@ const API_URL = "/api/chat";
 const POLL_INTERVAL = 4000;
 const MAX = 100;
 
+function getBubbleStyle(authorId: string | undefined, isMine: boolean) {
+  if (isMine) {
+    return {
+      bubbleClass: "bg-primary text-on-primary",
+      metaClass: "text-on-primary/90",
+      nameClass: "text-on-primary",
+      timeClass: "text-on-primary/70",
+      alignClass: "justify-end",
+    };
+  }
+
+  const seed = authorId || "anonymous";
+  const hash = [...seed].reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  const palette = [
+    { bubbleClass: "bg-blue-500/15 text-blue-700", metaClass: "text-blue-700", nameClass: "text-blue-700", timeClass: "text-blue-700/70", alignClass: "justify-start" },
+    { bubbleClass: "bg-emerald-500/15 text-emerald-700", metaClass: "text-emerald-700", nameClass: "text-emerald-700", timeClass: "text-emerald-700/70", alignClass: "justify-start" },
+    { bubbleClass: "bg-amber-500/15 text-amber-700", metaClass: "text-amber-700", nameClass: "text-amber-700", timeClass: "text-amber-700/70", alignClass: "justify-start" },
+    { bubbleClass: "bg-violet-500/15 text-violet-700", metaClass: "text-violet-700", nameClass: "text-violet-700", timeClass: "text-violet-700/70", alignClass: "justify-start" },
+    { bubbleClass: "bg-pink-500/15 text-pink-700", metaClass: "text-pink-700", nameClass: "text-pink-700", timeClass: "text-pink-700/70", alignClass: "justify-start" },
+    { bubbleClass: "bg-slate-600/15 text-slate-700", metaClass: "text-slate-700", nameClass: "text-slate-700", timeClass: "text-slate-700/70", alignClass: "justify-start" },
+  ];
+
+  const paletteIndex = hash % palette.length;
+  return palette[paletteIndex];
+}
+
 async function fetchMessages(): Promise<Msg[]> {
   const res = await fetch(API_URL, { cache: "no-store" });
   if (!res.ok) return [];
@@ -24,7 +50,6 @@ export function LiveChat() {
   const [text, setText] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
-  const [keyboardOpen, setKeyboardOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const currentAuthorId = typeof window !== "undefined" ? (window.localStorage.getItem("rtcr.livechat.author.v1") ?? "") : "";
   const { settings } = useSettings();
@@ -33,17 +58,6 @@ export function LiveChat() {
 
   useEffect(() => {
     setName(window.localStorage.getItem(NAME_KEY) ?? "");
-
-    const updateKeyboardState = () => {
-      const viewport = window.visualViewport;
-      if (!viewport) return;
-      const keyboardVisible = viewport.height < window.innerHeight - 120;
-      setKeyboardOpen(keyboardVisible);
-    };
-
-    updateKeyboardState();
-    window.visualViewport?.addEventListener("resize", updateKeyboardState);
-    window.addEventListener("resize", updateKeyboardState);
 
     let ignore = false;
     const load = async () => {
@@ -77,8 +91,6 @@ export function LiveChat() {
     return () => {
       ignore = true;
       window.clearInterval(interval);
-      window.visualViewport?.removeEventListener("resize", updateKeyboardState);
-      window.removeEventListener("resize", updateKeyboardState);
     };
   }, [messages.length, settings.notifications]);
 
@@ -150,7 +162,7 @@ export function LiveChat() {
       </div>
       <div
         ref={scrollRef}
-        className="mb-3 flex-1 space-y-2 overflow-y-auto rounded-lg bg-surface-container-high/50 p-2 pb-4 text-sm"
+        className="mb-3 flex-1 space-y-2 overflow-y-auto rounded-lg bg-surface-container-high/50 p-2 pb-24 text-sm"
       >
         {messages.length === 0 ? (
           <p className="py-8 text-center text-xs text-on-surface-variant">
@@ -159,53 +171,53 @@ export function LiveChat() {
         ) : (
           messages.map((m) => {
             const isMine = (m.authorId ?? "") === currentAuthorId;
-            const colorClass = isMine
-              ? "bg-primary/15 text-primary"
-              : (m.authorId ? "bg-secondary/15 text-secondary" : "bg-surface-container-low text-on-surface");
+            const style = getBubbleStyle(m.authorId, isMine);
             return (
-              <div key={m.id} className={`rounded-lg px-3 py-2 ${colorClass}`}>
-                <div className="flex items-baseline justify-between gap-2">
-                  <span className={`truncate text-[11px] font-bold ${isMine ? "text-primary" : m.authorId ? "text-secondary" : "text-on-surface-variant"}`}>{m.name}</span>
-                  <span className="text-[10px] text-on-surface-variant">
-                    {new Date(m.ts).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
-                  </span>
-                </div>
-                {editingId === m.id ? (
-                  <div className="mt-2 space-y-2">
-                    <input
-                      value={editValue}
-                      onChange={(e) => setEditValue(e.target.value)}
-                      maxLength={500}
-                      className="w-full rounded-lg border-none bg-surface-container-high px-2 py-1 text-sm outline-none"
-                    />
-                    <div className="flex gap-2">
-                      <button type="button" onClick={saveEdit} className="rounded-lg bg-primary px-2 py-1 text-[11px] font-semibold text-on-primary">
-                        Enregistrer
+              <div key={m.id} className={`flex ${style.alignClass}`}>
+                <div className={`max-w-[88%] rounded-2xl px-3 py-2 shadow-sm ${style.bubbleClass}`}>
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className={`truncate text-[11px] font-bold ${style.nameClass}`}>{m.name}</span>
+                    <span className={`text-[10px] ${style.timeClass}`}>
+                      {new Date(m.ts).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </div>
+                  {editingId === m.id ? (
+                    <div className="mt-2 space-y-2">
+                      <input
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        maxLength={500}
+                        className="w-full rounded-lg border-none bg-surface-container-high px-2 py-1 text-sm outline-none"
+                      />
+                      <div className="flex gap-2">
+                        <button type="button" onClick={saveEdit} className="rounded-lg bg-primary px-2 py-1 text-[11px] font-semibold text-on-primary">
+                          Enregistrer
+                        </button>
+                        <button type="button" onClick={() => { setEditingId(null); setEditValue(""); }} className="rounded-lg bg-surface-container-high px-2 py-1 text-[11px] font-semibold text-on-surface-variant">
+                          Annuler
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className={`break-words text-sm ${isMine ? "text-on-primary" : "text-on-surface"}`}>{m.text}</p>
+                  )}
+                  {isMine && editingId !== m.id && (
+                    <div className="mt-2 flex gap-2">
+                      <button type="button" onClick={() => { setEditingId(m.id); setEditValue(m.text); }} className={`text-[11px] font-semibold ${isMine ? "text-on-primary/90" : "text-primary"}`}>
+                        Modifier
                       </button>
-                      <button type="button" onClick={() => { setEditingId(null); setEditValue(""); }} className="rounded-lg bg-surface-container-high px-2 py-1 text-[11px] font-semibold text-on-surface-variant">
-                        Annuler
+                      <button type="button" onClick={() => void deleteMessage(m.id)} className={`text-[11px] font-semibold ${isMine ? "text-on-primary/80" : "text-secondary"}`}>
+                        Supprimer
                       </button>
                     </div>
-                  </div>
-                ) : (
-                  <p className="break-words text-sm text-on-surface">{m.text}</p>
-                )}
-                {isMine && editingId !== m.id && (
-                  <div className="mt-2 flex gap-2">
-                    <button type="button" onClick={() => { setEditingId(m.id); setEditValue(m.text); }} className="text-[11px] font-semibold text-primary">
-                      Modifier
-                    </button>
-                    <button type="button" onClick={() => void deleteMessage(m.id)} className="text-[11px] font-semibold text-secondary">
-                      Supprimer
-                    </button>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             );
           })
         )}
       </div>
-      <form onSubmit={send} className={`sticky z-10 space-y-2 bg-surface-container-low pt-2 transition-all ${keyboardOpen ? "bottom-20" : "bottom-0"}`}>
+      <form onSubmit={send} className="sticky bottom-0 z-10 space-y-2 bg-surface-container-low pt-2">
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
