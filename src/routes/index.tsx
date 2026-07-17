@@ -86,7 +86,7 @@ function HomePage() {
                     Lun–Ven 04h50–21h00 · en ligne 24h/7
                   </p>
                 </div>
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-on-primary shadow-[0_0_20px_rgba(26,75,255,0.4)] transition-transform active:scale-90">
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-white shadow-[0_0_20px_rgba(220,38,38,0.45)] transition-transform active:scale-90">
                   <Icon name="play_arrow" filled className="text-[32px]" />
                 </div>
               </div>

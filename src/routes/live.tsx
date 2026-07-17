@@ -4,11 +4,12 @@ import { BottomNav } from "@/components/BottomNav";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Icon } from "@/components/Icon";
 import { LiveChat } from "@/components/LiveChat";
+import { WhatsAppComposer } from "@/components/WhatsAppComposer";
+import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { rtcrLogoSrc } from "@/lib/assets";
 import { TopBar } from "@/components/TopBar";
 import { useRadio } from "@/lib/radio-context";
 import { useSettings } from "@/lib/settings-context";
-import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/live")({
   head: () => ({
@@ -157,15 +158,29 @@ function LivePage() {
         </div>
       </main>
 
-      <Dialog>
-        <div className="fixed bottom-28 right-4 z-50 flex flex-col items-end gap-3 pb-[env(safe-area-inset-bottom)]">
-          <Link
-            to="/connect"
-            aria-label="WhatsApp"
-            className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white/95 text-green-600 shadow-[0_12px_24px_rgba(0,0,0,0.18)] ring-1 ring-inset ring-white/80 transition hover:bg-white"
-          >
-            <Icon name="whatsapp" className="text-[26px]" />
-          </Link>
+      <div className="fixed bottom-28 right-4 z-50 flex flex-col items-end gap-3 pb-[env(safe-area-inset-bottom)]">
+        <Dialog>
+          <DialogTrigger asChild>
+            <button
+              type="button"
+              aria-label="WhatsApp"
+              className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-[0_12px_24px_rgba(0,0,0,0.18)] transition hover:bg-emerald-600"
+            >
+              <WhatsAppIcon className="h-6 w-6" />
+            </button>
+          </DialogTrigger>
+
+          <DialogContent className="max-w-sm p-0">
+            <div className="space-y-4 rounded-2xl bg-background p-5">
+              <p className="text-sm font-semibold text-on-surface-variant">
+                Les podcasts seront disponibles sous peu.
+              </p>
+              <WhatsAppComposer />
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog>
           <DialogTrigger asChild>
             <button
               type="button"
@@ -175,12 +190,12 @@ function LivePage() {
               <Icon name="chat_bubble" className="text-[26px]" />
             </button>
           </DialogTrigger>
-        </div>
 
-        <DialogContent className="max-w-sm p-0">
-          <LiveChat />
-        </DialogContent>
-      </Dialog>
+          <DialogContent className="max-w-sm p-0">
+            <LiveChat />
+          </DialogContent>
+        </Dialog>
+      </div>
 
       <BottomNav />
     </div>

@@ -37,7 +37,7 @@ export function NowPlayingBar() {
         </button>
         <button
           onClick={toggle}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-on-primary shadow-[0_0_20px_rgba(26,75,255,0.4)] transition-transform active:scale-90"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-red-600 text-white shadow-[0_0_20px_rgba(220,38,38,0.45)] transition-transform active:scale-90"
           aria-label={playing ? "Pause" : "Lecture"}
         >
           <Icon name={playing ? "pause" : "play_arrow"} filled />
