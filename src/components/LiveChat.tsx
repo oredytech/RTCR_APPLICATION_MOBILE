@@ -95,7 +95,12 @@ export function LiveChat() {
   }, [messages.length, settings.notifications]);
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    const el = scrollRef.current;
+    if (!el) return;
+    const isNearBottom = el.scrollHeight - el.clientHeight - el.scrollTop < 120;
+    if (isNearBottom) {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    }
   }, [messages.length]);
 
   async function send(e: FormEvent) {
@@ -152,7 +157,7 @@ export function LiveChat() {
   }
 
   return (
-    <section className="flex h-full w-full flex-col bg-surface-container-low p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+    <section className="flex h-full w-full flex-col overflow-hidden bg-surface-container-low p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-bold uppercase tracking-widest text-primary">Salon en direct</h3>
         <span className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant">
@@ -162,7 +167,7 @@ export function LiveChat() {
       </div>
       <div
         ref={scrollRef}
-        className="mb-3 flex-1 space-y-2 overflow-y-auto rounded-lg bg-surface-container-high/50 p-2 pb-24 text-sm"
+        className="mb-3 flex-1 min-h-0 space-y-2 overflow-y-auto rounded-lg bg-surface-container-high/50 p-2 pb-4 text-sm"
       >
         {messages.length === 0 ? (
           <p className="py-8 text-center text-xs text-on-surface-variant">
@@ -217,7 +222,7 @@ export function LiveChat() {
           })
         )}
       </div>
-      <form onSubmit={send} className="sticky bottom-0 z-10 space-y-2 bg-surface-container-low pt-2">
+      <form onSubmit={send} className="mt-auto shrink-0 space-y-2 bg-surface-container-low pt-2">
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -243,7 +248,7 @@ export function LiveChat() {
         </div>
       </form>
       <p className="mt-2 text-[10px] text-on-surface-variant">
-        Salon local partagé entre les onglets ouverts sur cet appareil.
+        Message de discussion dans le chat.
       </p>
     </section>
   );
