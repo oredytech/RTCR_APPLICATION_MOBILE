@@ -100,10 +100,15 @@ function LivePage() {
             </a>
             <button
               onClick={toggle}
-                className="flex h-20 w-20 items-center justify-center rounded-2xl bg-red-600 text-white transition-transform neon-glow active:scale-95"
-                aria-label={playing ? "Pause" : "Lecture"}
-              >
-                <Icon name={loading ? "hourglass_empty" : playing ? "pause" : "play_arrow"} filled className="text-[44px]" />
+              className="flex h-20 w-20 items-center justify-center rounded-2xl bg-red-600 text-white transition-transform neon-glow active:scale-95"
+              aria-label={playing ? "Pause" : "Lecture"}
+            >
+              <Icon name={loading ? "hourglass_empty" : playing ? "pause" : "play_arrow"} filled className="text-[44px]" />
+            </button>
+            <a href="mailto:r_tv_la_reference96mhz@yahoo.com" aria-label="Envoyer un e-mail" className="text-on-surface-variant transition-transform hover:text-primary active:scale-90">
+              <Icon name="mail" className="text-[28px]" />
+            </a>
+          </div>
           <div className="space-y-4 rounded-xl border bg-surface-container-low p-4">
             <div className="flex items-center gap-4">
               <button
