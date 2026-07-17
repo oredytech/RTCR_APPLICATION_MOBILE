@@ -54,10 +54,22 @@ const CONTACTS: Array<{ icon: string; label: string; value: string; href?: strin
 
 function ConnectPage() {
   const [sent, setSent] = useState(false);
+  const [name, setName] = useState("");
+  const [message, setMessage] = useState("");
+
   function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const trimmedName = name.trim() || "Anonyme";
+    const trimmedMessage = message.trim();
+    if (!trimmedMessage) return;
+
+    const subject = encodeURIComponent(`Message RTCR de ${trimmedName}`);
+    const body = encodeURIComponent(`Nom : ${trimmedName}\n\nMessage : ${trimmedMessage}`);
+    window.location.href = `mailto:rtvlareference@gmail.com?subject=${subject}&body=${body}`;
+
     setSent(true);
-    (e.currentTarget as HTMLFormElement).reset();
+    setName("");
+    setMessage("");
     setTimeout(() => setSent(false), 3000);
   }
 
@@ -146,7 +158,8 @@ function ConnectPage() {
               </label>
               <input
                 id="name"
-                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 className="w-full rounded-xl border-none bg-surface-container p-4 text-on-surface transition-all placeholder:text-outline focus:ring-2 focus:ring-primary"
                 placeholder="Nom & prénom"
               />
@@ -160,6 +173,8 @@ function ConnectPage() {
               </label>
               <textarea
                 id="msg"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
                 required
                 className="h-32 w-full rounded-xl border-none bg-surface-container p-4 text-on-surface transition-all placeholder:text-outline focus:ring-2 focus:ring-primary"
                 placeholder="Dites-nous ce qui vous préoccupe…"
