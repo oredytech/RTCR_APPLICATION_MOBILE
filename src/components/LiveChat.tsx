@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useSettings } from "@/lib/settings-context";
+import { showLocalNotification } from "@/lib/notification-manager";
 import { Icon } from "./Icon";
 
 type Msg = { id: string; name: string; text: string; ts: number };
@@ -19,6 +21,8 @@ export function LiveChat() {
   const [name, setName] = useState("");
   const [text, setText] = useState("");
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const { settings } = useSettings();
+  const lastSeenRef = useRef<number>(0);
 
   useEffect(() => {
     setName(window.localStorage.getItem(NAME_KEY) ?? "");
@@ -26,7 +30,18 @@ export function LiveChat() {
     let ignore = false;
     const load = async () => {
       const serverMessages = await fetchMessages();
-      if (!ignore) setMessages(serverMessages.slice(-MAX));
+      if (!ignore) {
+        const nextMessages = serverMessages.slice(-MAX);
+        const latest = nextMessages[nextMessages.length - 1]?.ts ?? 0;
+        if (nextMessages.length > 0 && latest > lastSeenRef.current && messages.length > 0) {
+          if (settings.notifications) {
+            const newest = nextMessages[nextMessages.length - 1];
+            showLocalNotification("Nouveau message", `${newest.name} : ${newest.text}`.slice(0, 120), "/live");
+          }
+        }
+        lastSeenRef.current = latest;
+        setMessages(nextMessages);
+      }
     };
 
     load();
@@ -35,7 +50,7 @@ export function LiveChat() {
       ignore = true;
       window.clearInterval(interval);
     };
-  }, []);
+  }, [messages.length, settings.notifications]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
