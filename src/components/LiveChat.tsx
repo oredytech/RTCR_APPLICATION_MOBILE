@@ -5,21 +5,21 @@ import { Icon } from "./Icon";
 
 const CHAT_BELL_AUDIO = "/audio/chat-alert.mp3";
 
-type Msg = { id: string; name: string; text: string; ts: number; authorId?: string };
+type Msg = { id: string; name: string; text: string; ts: number; authorId?: string; senderIp?: string };
 
 const NAME_KEY = "rtcr.livechat.name.v1";
 const API_URL = "/api/chat";
 const POLL_INTERVAL = 4000;
 const MAX = 100;
 
-function getBubbleStyle(authorId: string | undefined, isMine: boolean) {
+function getBubbleStyle(isMine: boolean) {
   if (isMine) {
     return {
       bubbleClass: "bg-[#002296] text-white",
       metaClass: "text-white/90",
       nameClass: "text-white",
       timeClass: "text-white/70",
-      alignClass: "justify-end",
+      alignClass: "justify-start",
       textClass: "text-white",
       actionClass: "text-white/90",
     };
@@ -30,16 +30,10 @@ function getBubbleStyle(authorId: string | undefined, isMine: boolean) {
     metaClass: "text-[#002296]",
     nameClass: "text-[#002296]",
     timeClass: "text-[#002296]/70",
-    alignClass: "justify-start",
+    alignClass: "justify-end",
     textClass: "text-[#002296]",
     actionClass: "text-[#002296]",
   };
-}
-
-async function fetchMessages(): Promise<Msg[]> {
-  const res = await fetch(API_URL, { cache: "no-store" });
-  if (!res.ok) return [];
-  return (await res.json()) as Msg[];
 }
 
 export function LiveChat() {
@@ -48,6 +42,7 @@ export function LiveChat() {
   const [text, setText] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
+  const [viewerIp, setViewerIp] = useState("");
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const currentAuthorId = typeof window !== "undefined" ? (window.localStorage.getItem("rtcr.livechat.author.v1") ?? "") : "";
   const { settings } = useSettings();
@@ -59,7 +54,11 @@ export function LiveChat() {
 
     let ignore = false;
     const load = async () => {
-      const serverMessages = await fetchMessages();
+      const res = await fetch(API_URL, { cache: "no-store" });
+      if (!res.ok) return;
+      const payload = (await res.json()) as { messages?: Msg[]; viewerIp?: string };
+      const serverMessages = payload.messages ?? [];
+      setViewerIp(payload.viewerIp ?? "");
       if (!ignore) {
         const nextMessages = serverMessages.slice(-MAX);
         const latest = nextMessages[nextMessages.length - 1]?.ts ?? 0;
@@ -110,7 +109,7 @@ export function LiveChat() {
     const res = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: n, text: t.slice(0, 500), authorId: window.localStorage.getItem("rtcr.livechat.author.v1") ?? "" }),
+      body: JSON.stringify({ name: n, text: t.slice(0, 500), authorId: window.localStorage.getItem("rtcr.livechat.author.v1") ?? "", senderIp: viewerIp }),
     });
 
     if (!res.ok) return;
@@ -130,7 +129,7 @@ export function LiveChat() {
     const res = await fetch(API_URL, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: editingId, text: value.slice(0, 500), authorId: currentAuthorId }),
+      body: JSON.stringify({ id: editingId, text: value.slice(0, 500), senderIp: viewerIp }),
     });
     if (!res.ok) return;
     const updated = (await res.json()) as Msg;
@@ -147,7 +146,7 @@ export function LiveChat() {
     const res = await fetch(API_URL, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, authorId: currentAuthorId }),
+      body: JSON.stringify({ id, senderIp: viewerIp }),
     });
     if (!res.ok) return;
     const removed = (await res.json()) as Msg;
@@ -173,8 +172,8 @@ export function LiveChat() {
           </p>
         ) : (
           messages.map((m) => {
-            const isMine = (m.authorId ?? "") === currentAuthorId;
-            const style = getBubbleStyle(m.authorId, isMine);
+            const isMine = viewerIp ? (m.senderIp ?? "") === viewerIp : (m.authorId ?? "") === currentAuthorId;
+            const style = getBubbleStyle(isMine);
             return (
               <div key={m.id} className={`flex ${style.alignClass}`}>
                 <div className={`max-w-[88%] rounded-2xl px-3 py-2 shadow-sm ${style.bubbleClass}`}>

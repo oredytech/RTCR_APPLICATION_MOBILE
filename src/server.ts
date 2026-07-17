@@ -46,7 +46,7 @@ function isH3SwallowedErrorBody(body: string): boolean {
 
 const CHAT_STATE_KEY = "__rtcr_livechat_state_v1";
 
-type Msg = { id: string; name: string; text: string; ts: number; authorId?: string };
+type Msg = { id: string; name: string; text: string; ts: number; authorId?: string; senderIp?: string };
 
 interface ChatState {
   messages: Msg[];
@@ -67,6 +67,14 @@ function cleanupChat() {
   state.messages = state.messages.filter((msg) => msg.ts > cutoff).slice(-MAX_MESSAGES);
 }
 
+function getClientIp(request: Request): string {
+  const headers = request.headers;
+  const forwarded = headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  const candidates = [forwarded, headers.get("cf-connecting-ip"), headers.get("x-real-ip"), headers.get("true-client-ip"), headers.get("x-client-ip")];
+  const ip = candidates.find((value): value is string => typeof value === "string" && value.length > 0);
+  return ip ?? "unknown";
+}
+
 async function handleChatRequest(request: Request): Promise<Response | null> {
   const url = new URL(request.url);
   if (url.pathname !== "/api/chat") {
@@ -75,7 +83,7 @@ async function handleChatRequest(request: Request): Promise<Response | null> {
 
   cleanupChat();
   if (request.method === "GET") {
-    return new Response(JSON.stringify(getChatState().messages), {
+    return new Response(JSON.stringify({ messages: getChatState().messages, viewerIp: getClientIp(request) }), {
       headers: {
         "content-type": "application/json; charset=utf-8",
         "cache-control": "no-store, max-age=0",
@@ -106,6 +114,7 @@ async function handleChatRequest(request: Request): Promise<Response | null> {
       text,
       ts: Date.now(),
       authorId: typeof payload.authorId === "string" ? payload.authorId : undefined,
+      senderIp: getClientIp(request),
     };
 
     const state = getChatState();
@@ -136,8 +145,8 @@ async function handleChatRequest(request: Request): Promise<Response | null> {
       });
     }
 
-    const authorId = typeof payload.authorId === "string" ? payload.authorId : undefined;
-    if (!authorId || state.messages[index].authorId !== authorId) {
+    const senderIp = getClientIp(request);
+    if (state.messages[index].senderIp !== senderIp) {
       return new Response(JSON.stringify({ error: "Non autorisé" }), {
         status: 403,
         headers: { "content-type": "application/json; charset=utf-8" },
@@ -173,8 +182,8 @@ async function handleChatRequest(request: Request): Promise<Response | null> {
       });
     }
 
-    const authorId = typeof payload.authorId === "string" ? payload.authorId : undefined;
-    if (!authorId || state.messages[index].authorId !== authorId) {
+    const senderIp = getClientIp(request);
+    if (state.messages[index].senderIp !== senderIp) {
       return new Response(JSON.stringify({ error: "Non autorisé" }), {
         status: 403,
         headers: { "content-type": "application/json; charset=utf-8" },
