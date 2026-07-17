@@ -1,12 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppImage } from "@/components/AppImage";
 import { BottomNav } from "@/components/BottomNav";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Icon } from "@/components/Icon";
 import { LiveChat } from "@/components/LiveChat";
 import { rtcrLogoSrc } from "@/lib/assets";
 import { TopBar } from "@/components/TopBar";
 import { useRadio } from "@/lib/radio-context";
 import { useSettings } from "@/lib/settings-context";
+import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/live")({
   head: () => ({
@@ -98,24 +100,10 @@ function LivePage() {
             </a>
             <button
               onClick={toggle}
-              className="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary text-on-primary transition-transform neon-glow active:scale-95"
-              aria-label={playing ? "Pause" : "Lecture"}
-            >
-              <Icon name={loading ? "hourglass_empty" : playing ? "pause" : "play_arrow"} filled className="text-[44px]" />
-            </button>
-            <button
-              onClick={pause}
-              disabled={!isLive}
-              className="flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary text-white transition-transform active:scale-95 disabled:opacity-40"
-              aria-label="Arrêter la lecture"
-            >
-              <Icon name="stop" filled className="text-[32px]" />
-            </button>
-            <a href="mailto:r_tv_la_reference96mhz@yahoo.com" aria-label="Envoyer un e-mail" className="text-on-surface-variant transition-transform hover:text-primary active:scale-90">
-              <Icon name="mail" className="text-[28px]" />
-            </a>
-          </div>
-
+                className="flex h-20 w-20 items-center justify-center rounded-2xl bg-red-600 text-white transition-transform neon-glow active:scale-95"
+                aria-label={playing ? "Pause" : "Lecture"}
+              >
+                <Icon name={loading ? "hourglass_empty" : playing ? "pause" : "play_arrow"} filled className="text-[44px]" />
           <div className="space-y-4 rounded-xl border bg-surface-container-low p-4">
             <div className="flex items-center gap-4">
               <button
@@ -158,13 +146,37 @@ function LivePage() {
             </button>
           </div>
 
-          <LiveChat />
-
           <p className="text-center text-[11px] text-on-surface-variant">
             Flux radio en direct fourni par Zeno.FM · stream.zeno.fm/cgxrxyyhjsrtv
           </p>
         </div>
       </main>
+
+      <Dialog>
+        <div className="fixed bottom-28 right-4 z-50 flex flex-col items-end gap-3 pb-[env(safe-area-inset-bottom)]">
+          <Link
+            to="/connect"
+            aria-label="WhatsApp"
+            className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white/95 text-green-600 shadow-[0_12px_24px_rgba(0,0,0,0.18)] ring-1 ring-inset ring-white/80 transition hover:bg-white"
+          >
+            <Icon name="whatsapp" className="text-[26px]" />
+          </Link>
+          <DialogTrigger asChild>
+            <button
+              type="button"
+              aria-label="Chat direct"
+              className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary text-on-primary shadow-[0_12px_24px_rgba(0,0,0,0.18)] transition hover:bg-primary/90"
+            >
+              <Icon name="chat_bubble" className="text-[26px]" />
+            </button>
+          </DialogTrigger>
+        </div>
+
+        <DialogContent className="max-w-sm p-0">
+          <LiveChat />
+        </DialogContent>
+      </Dialog>
+
       <BottomNav />
     </div>
   );

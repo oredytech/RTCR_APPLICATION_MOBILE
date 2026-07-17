@@ -5,6 +5,7 @@ const items = [
   { to: "/", label: "Accueil", icon: "home" },
   { to: "/live", label: "Direct", icon: "radio" },
   { to: "/discover", label: "Actualités", icon: "newspaper" },
+  { to: "/podcasts", label: "Podcasts", icon: "podcasts" },
   { to: "/history", label: "Historique", icon: "history" },
   { to: "/connect", label: "Contact", icon: "call" },
 ] as const;
