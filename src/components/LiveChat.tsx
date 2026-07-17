@@ -3,6 +3,8 @@ import { useSettings } from "@/lib/settings-context";
 import { showLocalNotification } from "@/lib/notification-manager";
 import { Icon } from "./Icon";
 
+const CHAT_BELL_AUDIO = "/audio/chat-alert.mp3";
+
 type Msg = { id: string; name: string; text: string; ts: number };
 
 const NAME_KEY = "rtcr.livechat.name.v1";
@@ -23,6 +25,7 @@ export function LiveChat() {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const { settings } = useSettings();
   const lastSeenRef = useRef<number>(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     setName(window.localStorage.getItem(NAME_KEY) ?? "");
@@ -34,9 +37,19 @@ export function LiveChat() {
         const nextMessages = serverMessages.slice(-MAX);
         const latest = nextMessages[nextMessages.length - 1]?.ts ?? 0;
         if (nextMessages.length > 0 && latest > lastSeenRef.current && messages.length > 0) {
+          const newest = nextMessages[nextMessages.length - 1];
           if (settings.notifications) {
-            const newest = nextMessages[nextMessages.length - 1];
             showLocalNotification("Nouveau message", `${newest.name} : ${newest.text}`.slice(0, 120), "/live");
+          }
+          if (settings.chatSoundEnabled) {
+            try {
+              if (!audioRef.current) {
+                audioRef.current = new Audio(CHAT_BELL_AUDIO);
+              }
+              audioRef.current.play().catch(() => undefined);
+            } catch {
+              // ignore audio playback issues
+            }
           }
         }
         lastSeenRef.current = latest;

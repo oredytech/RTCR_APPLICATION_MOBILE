@@ -21,6 +21,7 @@ export type Settings = {
   notifyLive: boolean;
   notifyPrograms: boolean;
   notifyCommunity: boolean;
+  chatSoundEnabled: boolean;
   autoplayRadio: boolean;
   autoReconnect: boolean;
   radioQuality: RadioQuality;
@@ -46,6 +47,7 @@ const DEFAULTS: Settings = {
   notifyLive: true,
   notifyPrograms: false,
   notifyCommunity: true,
+  chatSoundEnabled: true,
   autoplayRadio: false,
   autoReconnect: true,
   radioQuality: "auto",

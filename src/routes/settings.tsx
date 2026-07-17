@@ -239,6 +239,9 @@ function SettingsPage() {
             <Row icon="groups" title="Communauté" desc="Annonces locales et activités communautaires">
               <Toggle label="Communauté" value={settings.notifyCommunity} onChange={(v) => update("notifyCommunity", v)} />
             </Row>
+            <Row icon="volume_up" title="Son du chat" desc="Émettre un son à chaque nouveau message du chat direct">
+              <Toggle label="Son du chat" value={settings.chatSoundEnabled} onChange={(v) => update("chatSoundEnabled", v)} />
+            </Row>
           </div>
         </section>
 

@@ -10,6 +10,7 @@ import { rtcrLogoSrc } from "@/lib/assets";
 import { TopBar } from "@/components/TopBar";
 import { useRadio } from "@/lib/radio-context";
 import { useSettings } from "@/lib/settings-context";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/live")({
   head: () => ({
@@ -32,7 +33,25 @@ export const Route = createFileRoute("/live")({
 function LivePage() {
   const { playing, loading, error, toggle, pause, volume, setVolume, muted, setMuted, quality, setQuality, title } = useRadio();
   const { settings, update } = useSettings();
+  const [chatCount, setChatCount] = useState(0);
   const isLive = playing || loading;
+
+  useEffect(() => {
+    const loadCount = async () => {
+      try {
+        const res = await fetch("/api/chat", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = (await res.json()) as Array<{ id: string }>;
+        setChatCount(data.length);
+      } catch {
+        setChatCount(0);
+      }
+    };
+
+    loadCount();
+    const interval = window.setInterval(loadCount, 4000);
+    return () => window.clearInterval(interval);
+  }, []);
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-on-surface">
@@ -194,9 +213,12 @@ function LivePage() {
             <button
               type="button"
               aria-label="Chat direct"
-              className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary text-on-primary shadow-[0_12px_24px_rgba(0,0,0,0.18)] transition hover:bg-primary/90"
+              className="relative inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary text-on-primary shadow-[0_12px_24px_rgba(0,0,0,0.18)] transition hover:bg-primary/90"
             >
               <Icon name="chat_bubble" className="text-[26px]" />
+              <span className="absolute -right-1 -top-1 flex min-h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white">
+                {chatCount}
+              </span>
             </button>
           </DialogTrigger>
 
