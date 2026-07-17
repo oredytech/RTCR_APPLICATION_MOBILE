@@ -222,7 +222,7 @@ function LivePage() {
             </button>
           </DialogTrigger>
 
-          <DialogContent className="max-w-sm p-0">
+          <DialogContent className="h-[100dvh] w-[100dvw] max-w-none translate-x-[-50%] translate-y-[-50%] rounded-none border-0 p-0 sm:h-[100dvh] sm:w-[100dvw]">
             <LiveChat />
           </DialogContent>
         </Dialog>

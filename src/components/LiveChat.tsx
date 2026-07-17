@@ -5,7 +5,7 @@ import { Icon } from "./Icon";
 
 const CHAT_BELL_AUDIO = "/audio/chat-alert.mp3";
 
-type Msg = { id: string; name: string; text: string; ts: number };
+type Msg = { id: string; name: string; text: string; ts: number; authorId?: string };
 
 const NAME_KEY = "rtcr.livechat.name.v1";
 const API_URL = "/api/chat";
@@ -22,7 +22,10 @@ export function LiveChat() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [name, setName] = useState("");
   const [text, setText] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const currentAuthorId = window.localStorage.getItem("rtcr.livechat.author.v1") ?? "";
   const { settings } = useSettings();
   const lastSeenRef = useRef<number>(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -78,18 +81,46 @@ export function LiveChat() {
     const res = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: n, text: t.slice(0, 500) }),
+      body: JSON.stringify({ name: n, text: t.slice(0, 500), authorId: window.localStorage.getItem("rtcr.livechat.author.v1") ?? "" }),
     });
 
     if (!res.ok) return;
     const msg = (await res.json()) as Msg;
     setMessages((prev) => [...prev, msg].slice(-MAX));
     window.localStorage.setItem(NAME_KEY, n);
+    window.localStorage.setItem("rtcr.livechat.author.v1", msg.authorId ?? "");
     setText("");
   }
 
+  async function saveEdit() {
+    const value = editValue.trim();
+    if (!editingId || !value) return;
+    const res = await fetch(API_URL, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: editingId, text: value.slice(0, 500) }),
+    });
+    if (!res.ok) return;
+    const updated = (await res.json()) as Msg;
+    setMessages((prev) => prev.map((m) => (m.id === updated.id ? updated : m)).slice(-MAX));
+    setEditingId(null);
+    setEditValue("");
+  }
+
+  async function deleteMessage(id: string) {
+    if (!id) return;
+    const res = await fetch(API_URL, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (!res.ok) return;
+    const removed = (await res.json()) as Msg;
+    setMessages((prev) => prev.filter((m) => m.id !== removed.id).slice(-MAX));
+  }
+
   return (
-    <section className="w-full max-w-sm rounded-xl border bg-surface-container-low p-4">
+    <section className="flex h-full w-full flex-col bg-surface-container-low p-4">
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-bold uppercase tracking-widest text-primary">Salon en direct</h3>
         <span className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant">
@@ -99,24 +130,59 @@ export function LiveChat() {
       </div>
       <div
         ref={scrollRef}
-        className="mb-3 h-48 space-y-2 overflow-y-auto rounded-lg bg-surface-container-high/50 p-2 text-sm"
+        className="mb-3 flex-1 space-y-2 overflow-y-auto rounded-lg bg-surface-container-high/50 p-2 text-sm"
       >
         {messages.length === 0 ? (
           <p className="py-8 text-center text-xs text-on-surface-variant">
             Soyez le premier à écrire dans le salon.
           </p>
         ) : (
-          messages.map((m) => (
-            <div key={m.id} className="rounded-lg bg-surface-container-low px-3 py-2">
-              <div className="flex items-baseline justify-between gap-2">
-                <span className="truncate text-[11px] font-bold text-primary">{m.name}</span>
-                <span className="text-[10px] text-on-surface-variant">
-                  {new Date(m.ts).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
-                </span>
+          messages.map((m) => {
+            const isMine = (m.authorId ?? "") === currentAuthorId;
+            const colorClass = isMine
+              ? "bg-primary/15 text-primary"
+              : (m.authorId ? "bg-secondary/15 text-secondary" : "bg-surface-container-low text-on-surface");
+            return (
+              <div key={m.id} className={`rounded-lg px-3 py-2 ${colorClass}`}>
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className={`truncate text-[11px] font-bold ${isMine ? "text-primary" : m.authorId ? "text-secondary" : "text-on-surface-variant"}`}>{m.name}</span>
+                  <span className="text-[10px] text-on-surface-variant">
+                    {new Date(m.ts).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                </div>
+                {editingId === m.id ? (
+                  <div className="mt-2 space-y-2">
+                    <input
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      maxLength={500}
+                      className="w-full rounded-lg border-none bg-surface-container-high px-2 py-1 text-sm outline-none"
+                    />
+                    <div className="flex gap-2">
+                      <button type="button" onClick={saveEdit} className="rounded-lg bg-primary px-2 py-1 text-[11px] font-semibold text-on-primary">
+                        Enregistrer
+                      </button>
+                      <button type="button" onClick={() => { setEditingId(null); setEditValue(""); }} className="rounded-lg bg-surface-container-high px-2 py-1 text-[11px] font-semibold text-on-surface-variant">
+                        Annuler
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="break-words text-sm text-on-surface">{m.text}</p>
+                )}
+                {isMine && editingId !== m.id && (
+                  <div className="mt-2 flex gap-2">
+                    <button type="button" onClick={() => { setEditingId(m.id); setEditValue(m.text); }} className="text-[11px] font-semibold text-primary">
+                      Modifier
+                    </button>
+                    <button type="button" onClick={() => deleteMessage(m.id)} className="text-[11px] font-semibold text-secondary">
+                      Supprimer
+                    </button>
+                  </div>
+                )}
               </div>
-              <p className="break-words text-sm text-on-surface">{m.text}</p>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
       <form onSubmit={send} className="space-y-2">
