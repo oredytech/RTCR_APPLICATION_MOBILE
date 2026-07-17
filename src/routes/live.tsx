@@ -16,13 +16,21 @@ export const Route = createFileRoute("/live")({
     meta: [
       { title: "Direct — RTCR 96.0 Mhz" },
       { name: "description", content: "Écoutez RTCR en direct — Radio 96.0 Mhz FM et TV canal 6 depuis Komanda, RDC." },
+      { property: "og:title", content: "Direct — RTCR 96.0 Mhz" },
+      { property: "og:description", content: "Écoutez RTCR en direct — Radio 96.0 Mhz FM et TV canal 6 depuis Komanda, RDC." },
+      { property: "og:type", content: "website" },
+      { property: "og:locale", content: "fr_FR" },
+      { property: "og:image", content: "/icons/icon-192.png" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Direct — RTCR 96.0 Mhz" },
+      { name: "twitter:description", content: "Écoutez RTCR en direct — Radio 96.0 Mhz FM et TV canal 6 depuis Komanda, RDC." },
     ],
   }),
   component: LivePage,
 });
 
 function LivePage() {
-  const { playing, loading, error, toggle, pause, volume, setVolume, muted, setMuted, quality, setQuality } = useRadio();
+  const { playing, loading, error, toggle, pause, volume, setVolume, muted, setMuted, quality, setQuality, title } = useRadio();
   const { settings, update } = useSettings();
   const isLive = playing || loading;
 
@@ -72,6 +80,7 @@ function LivePage() {
             </span>
           </div>
           <h2 className="mb-1 px-4 text-3xl font-bold">RTCR La Référence</h2>
+          <p className="text-sm font-semibold uppercase tracking-widest text-primary">Titre en cours : {title}</p>
           <p className="text-on-surface-variant">Komanda · République démocratique du Congo</p>
         </div>
 

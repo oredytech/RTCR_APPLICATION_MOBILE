@@ -18,6 +18,7 @@ type Ctx = {
   volume: number;
   muted: boolean;
   quality: "auto" | "standard";
+  title: string;
   error: string | null;
   toggle: () => void;
   play: () => void;
@@ -37,6 +38,7 @@ export function RadioProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(false);
   const [volume, setVolumeState] = useState(70);
   const [muted, setMutedState] = useState(false);
+  const [title, setTitle] = useState("RTCR Radio 96.0 Mhz");
   const [error, setError] = useState<string | null>(null);
   const { settings, update } = useSettings();
 
@@ -97,6 +99,10 @@ export function RadioProvider({ children }: { children: ReactNode }) {
       setError("Connexion instable. Reprise automatique…");
       scheduleReconnect();
     };
+    const onLoadedMetadata = () => {
+      const metaTitle = a?.title?.trim();
+      if (metaTitle) setTitle(metaTitle);
+    };
     const onError = () => {
       const canReconnect = autoReconnectRef.current;
       setError(canReconnect ? "Connexion perdue. Reprise automatique…" : "Lecture impossible. Vérifiez votre connexion.");
@@ -108,6 +114,7 @@ export function RadioProvider({ children }: { children: ReactNode }) {
     a.addEventListener("pause", onPause);
     a.addEventListener("waiting", onWaiting);
     a.addEventListener("playing", onPlaying);
+    a.addEventListener("loadedmetadata", onLoadedMetadata);
     a.addEventListener("stalled", onStalled);
     a.addEventListener("error", onError);
     return () => {
@@ -117,6 +124,7 @@ export function RadioProvider({ children }: { children: ReactNode }) {
       a.removeEventListener("pause", onPause);
       a.removeEventListener("waiting", onWaiting);
       a.removeEventListener("playing", onPlaying);
+      a.removeEventListener("loadedmetadata", onLoadedMetadata);
       a.removeEventListener("stalled", onStalled);
       a.removeEventListener("error", onError);
       audioRef.current = null;
@@ -166,8 +174,8 @@ export function RadioProvider({ children }: { children: ReactNode }) {
   }, [pause, play, playing, update]);
 
   const value = useMemo(
-    () => ({ playing, loading, volume, muted, quality: settings.radioQuality, error, toggle, play, pause, setVolume, setMuted, setQuality }),
-    [playing, loading, volume, muted, settings.radioQuality, error, toggle, play, pause, setVolume, setMuted, setQuality],
+    () => ({ playing, loading, volume, muted, quality: settings.radioQuality, title, error, toggle, play, pause, setVolume, setMuted, setQuality }),
+    [playing, loading, volume, muted, settings.radioQuality, title, error, toggle, play, pause, setVolume, setMuted, setQuality],
   );
 
   return <RadioContext.Provider value={value}>{children}</RadioContext.Provider>;
