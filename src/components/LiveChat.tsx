@@ -3,54 +3,37 @@ import { Icon } from "./Icon";
 
 type Msg = { id: string; name: string; text: string; ts: number };
 
-const STORAGE_KEY = "rtcr.livechat.messages.v1";
 const NAME_KEY = "rtcr.livechat.name.v1";
+const API_URL = "/api/chat";
+const POLL_INTERVAL = 4000;
 const MAX = 100;
 
-function load(): Msg[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const arr = JSON.parse(raw) as Msg[];
-    return Array.isArray(arr) ? arr.slice(-MAX) : [];
-  } catch {
-    return [];
-  }
-}
-
-function save(msgs: Msg[]) {
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(msgs.slice(-MAX)));
-  } catch {
-    /* ignore */
-  }
+async function fetchMessages(): Promise<Msg[]> {
+  const res = await fetch(API_URL, { cache: "no-store" });
+  if (!res.ok) return [];
+  return (await res.json()) as Msg[];
 }
 
 export function LiveChat() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [name, setName] = useState("");
   const [text, setText] = useState("");
-  const bcRef = useRef<BroadcastChannel | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    setMessages(load());
     setName(window.localStorage.getItem(NAME_KEY) ?? "");
-    const bc = "BroadcastChannel" in window ? new BroadcastChannel("rtcr-livechat") : null;
-    bcRef.current = bc;
-    const onMsg = (e: MessageEvent) => {
-      if (e.data?.type === "msg") setMessages((prev) => [...prev, e.data.msg as Msg].slice(-MAX));
+
+    let ignore = false;
+    const load = async () => {
+      const serverMessages = await fetchMessages();
+      if (!ignore) setMessages(serverMessages.slice(-MAX));
     };
-    bc?.addEventListener("message", onMsg);
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY) setMessages(load());
-    };
-    window.addEventListener("storage", onStorage);
+
+    load();
+    const interval = window.setInterval(load, POLL_INTERVAL);
     return () => {
-      bc?.removeEventListener("message", onMsg);
-      bc?.close();
-      window.removeEventListener("storage", onStorage);
+      ignore = true;
+      window.clearInterval(interval);
     };
   }, []);
 
@@ -58,16 +41,21 @@ export function LiveChat() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages.length]);
 
-  function send(e: FormEvent) {
+  async function send(e: FormEvent) {
     e.preventDefault();
     const t = text.trim();
     const n = (name.trim() || "Anonyme").slice(0, 24);
     if (!t) return;
-    const msg: Msg = { id: crypto.randomUUID(), name: n, text: t.slice(0, 500), ts: Date.now() };
-    const next = [...messages, msg].slice(-MAX);
-    setMessages(next);
-    save(next);
-    bcRef.current?.postMessage({ type: "msg", msg });
+
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: n, text: t.slice(0, 500) }),
+    });
+
+    if (!res.ok) return;
+    const msg = (await res.json()) as Msg;
+    setMessages((prev) => [...prev, msg].slice(-MAX));
     window.localStorage.setItem(NAME_KEY, n);
     setText("");
   }

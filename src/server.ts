@@ -44,9 +44,91 @@ function isH3SwallowedErrorBody(body: string): boolean {
   }
 }
 
+const CHAT_STATE_KEY = "__rtcr_livechat_state_v1";
+
+type Msg = { id: string; name: string; text: string; ts: number };
+
+interface ChatState {
+  messages: Msg[];
+}
+
+const chatState = ((globalThis as unknown) as Record<string, unknown>)[CHAT_STATE_KEY] as ChatState | undefined;
+if (!chatState) {
+  ((globalThis as unknown) as Record<string, unknown>)[CHAT_STATE_KEY] = { messages: [] };
+}
+
+const getChatState = () => ((globalThis as unknown) as Record<string, unknown>)[CHAT_STATE_KEY] as ChatState;
+const TTL = 24 * 60 * 60 * 1000;
+const MAX_MESSAGES = 250;
+
+function cleanupChat() {
+  const cutoff = Date.now() - TTL;
+  const state = getChatState();
+  state.messages = state.messages.filter((msg) => msg.ts > cutoff).slice(-MAX_MESSAGES);
+}
+
+async function handleChatRequest(request: Request): Promise<Response | null> {
+  const url = new URL(request.url);
+  if (url.pathname !== "/api/chat") {
+    return null;
+  }
+
+  cleanupChat();
+  if (request.method === "GET") {
+    return new Response(JSON.stringify(getChatState().messages), {
+      headers: {
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "no-store, max-age=0",
+      },
+    });
+  }
+
+  if (request.method === "POST") {
+    const payload = await request.json().catch(() => null);
+    if (
+      !payload ||
+      typeof payload.text !== "string" ||
+      !payload.text.trim() ||
+      typeof payload.name !== "string"
+    ) {
+      return new Response(JSON.stringify({ error: "Payload invalide" }), {
+        status: 400,
+        headers: { "content-type": "application/json; charset=utf-8" },
+      });
+    }
+
+    const name = payload.name.trim().slice(0, 24) || "Anonyme";
+    const text = payload.text.trim().slice(0, 500);
+
+    const msg: Msg = {
+      id: crypto.randomUUID(),
+      name,
+      text,
+      ts: Date.now(),
+    };
+
+    const state = getChatState();
+    state.messages = [...state.messages, msg].slice(-MAX_MESSAGES);
+    cleanupChat();
+
+    return new Response(JSON.stringify(msg), {
+      status: 201,
+      headers: { "content-type": "application/json; charset=utf-8" },
+    });
+  }
+
+  return new Response(JSON.stringify({ error: "Méthode non autorisée" }), {
+    status: 405,
+    headers: { "content-type": "application/json; charset=utf-8", Allow: "GET, POST" },
+  });
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      const chatResponse = await handleChatRequest(request);
+      if (chatResponse) return chatResponse;
+
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
