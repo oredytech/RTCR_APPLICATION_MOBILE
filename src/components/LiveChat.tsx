@@ -15,27 +15,25 @@ const MAX = 100;
 function getBubbleStyle(authorId: string | undefined, isMine: boolean) {
   if (isMine) {
     return {
-      bubbleClass: "bg-primary text-on-primary",
-      metaClass: "text-on-primary/90",
-      nameClass: "text-on-primary",
-      timeClass: "text-on-primary/70",
+      bubbleClass: "bg-[#002296] text-white",
+      metaClass: "text-white/90",
+      nameClass: "text-white",
+      timeClass: "text-white/70",
       alignClass: "justify-end",
+      textClass: "text-white",
+      actionClass: "text-white/90",
     };
   }
 
-  const seed = authorId || "anonymous";
-  const hash = [...seed].reduce((sum, char) => sum + char.charCodeAt(0), 0);
-  const palette = [
-    { bubbleClass: "bg-blue-500/15 text-blue-700", metaClass: "text-blue-700", nameClass: "text-blue-700", timeClass: "text-blue-700/70", alignClass: "justify-start" },
-    { bubbleClass: "bg-emerald-500/15 text-emerald-700", metaClass: "text-emerald-700", nameClass: "text-emerald-700", timeClass: "text-emerald-700/70", alignClass: "justify-start" },
-    { bubbleClass: "bg-amber-500/15 text-amber-700", metaClass: "text-amber-700", nameClass: "text-amber-700", timeClass: "text-amber-700/70", alignClass: "justify-start" },
-    { bubbleClass: "bg-violet-500/15 text-violet-700", metaClass: "text-violet-700", nameClass: "text-violet-700", timeClass: "text-violet-700/70", alignClass: "justify-start" },
-    { bubbleClass: "bg-pink-500/15 text-pink-700", metaClass: "text-pink-700", nameClass: "text-pink-700", timeClass: "text-pink-700/70", alignClass: "justify-start" },
-    { bubbleClass: "bg-slate-600/15 text-slate-700", metaClass: "text-slate-700", nameClass: "text-slate-700", timeClass: "text-slate-700/70", alignClass: "justify-start" },
-  ];
-
-  const paletteIndex = hash % palette.length;
-  return palette[paletteIndex];
+  return {
+    bubbleClass: "bg-[#A3B9FF] text-[#002296]",
+    metaClass: "text-[#002296]",
+    nameClass: "text-[#002296]",
+    timeClass: "text-[#002296]/70",
+    alignClass: "justify-start",
+    textClass: "text-[#002296]",
+    actionClass: "text-[#002296]",
+  };
 }
 
 async function fetchMessages(): Promise<Msg[]> {
@@ -204,14 +202,14 @@ export function LiveChat() {
                       </div>
                     </div>
                   ) : (
-                    <p className={`break-words text-sm ${isMine ? "text-on-primary" : "text-on-surface"}`}>{m.text}</p>
+                    <p className={`break-words text-sm ${style.textClass}`}>{m.text}</p>
                   )}
                   {isMine && editingId !== m.id && (
                     <div className="mt-2 flex gap-2">
-                      <button type="button" onClick={() => { setEditingId(m.id); setEditValue(m.text); }} className={`text-[11px] font-semibold ${isMine ? "text-on-primary/90" : "text-primary"}`}>
+                      <button type="button" onClick={() => { setEditingId(m.id); setEditValue(m.text); }} className={`text-[11px] font-semibold ${style.actionClass}`}>
                         Modifier
                       </button>
-                      <button type="button" onClick={() => void deleteMessage(m.id)} className={`text-[11px] font-semibold ${isMine ? "text-on-primary/80" : "text-secondary"}`}>
+                      <button type="button" onClick={() => void deleteMessage(m.id)} className={`text-[11px] font-semibold ${style.actionClass}`}>
                         Supprimer
                       </button>
                     </div>
