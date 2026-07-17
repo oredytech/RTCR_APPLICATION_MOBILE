@@ -136,6 +136,14 @@ async function handleChatRequest(request: Request): Promise<Response | null> {
       });
     }
 
+    const authorId = typeof payload.authorId === "string" ? payload.authorId : undefined;
+    if (!authorId || state.messages[index].authorId !== authorId) {
+      return new Response(JSON.stringify({ error: "Non autorisé" }), {
+        status: 403,
+        headers: { "content-type": "application/json; charset=utf-8" },
+      });
+    }
+
     state.messages[index] = {
       ...state.messages[index],
       text: payload.text.trim().slice(0, 500),
@@ -161,6 +169,14 @@ async function handleChatRequest(request: Request): Promise<Response | null> {
     if (index === -1) {
       return new Response(JSON.stringify({ error: "Message introuvable" }), {
         status: 404,
+        headers: { "content-type": "application/json; charset=utf-8" },
+      });
+    }
+
+    const authorId = typeof payload.authorId === "string" ? payload.authorId : undefined;
+    if (!authorId || state.messages[index].authorId !== authorId) {
+      return new Response(JSON.stringify({ error: "Non autorisé" }), {
+        status: 403,
         headers: { "content-type": "application/json; charset=utf-8" },
       });
     }

@@ -132,7 +132,7 @@ export function LiveChat() {
     const res = await fetch(API_URL, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: editingId, text: value.slice(0, 500) }),
+      body: JSON.stringify({ id: editingId, text: value.slice(0, 500), authorId: currentAuthorId }),
     });
     if (!res.ok) return;
     const updated = (await res.json()) as Msg;
@@ -149,7 +149,7 @@ export function LiveChat() {
     const res = await fetch(API_URL, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
+      body: JSON.stringify({ id, authorId: currentAuthorId }),
     });
     if (!res.ok) return;
     const removed = (await res.json()) as Msg;
