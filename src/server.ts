@@ -46,7 +46,7 @@ function isH3SwallowedErrorBody(body: string): boolean {
 
 const CHAT_STATE_KEY = "__rtcr_livechat_state_v1";
 
-type Msg = { id: string; name: string; text: string; ts: number };
+type Msg = { id: string; name: string; text: string; ts: number; authorId?: string };
 
 interface ChatState {
   messages: Msg[];
@@ -105,6 +105,7 @@ async function handleChatRequest(request: Request): Promise<Response | null> {
       name,
       text,
       ts: Date.now(),
+      authorId: typeof payload.authorId === "string" ? payload.authorId : undefined,
     };
 
     const state = getChatState();
@@ -117,9 +118,64 @@ async function handleChatRequest(request: Request): Promise<Response | null> {
     });
   }
 
+  if (request.method === "PUT") {
+    const payload = await request.json().catch(() => null);
+    if (!payload || typeof payload.id !== "string" || typeof payload.text !== "string") {
+      return new Response(JSON.stringify({ error: "Payload invalide" }), {
+        status: 400,
+        headers: { "content-type": "application/json; charset=utf-8" },
+      });
+    }
+
+    const state = getChatState();
+    const index = state.messages.findIndex((message) => message.id === payload.id);
+    if (index === -1) {
+      return new Response(JSON.stringify({ error: "Message introuvable" }), {
+        status: 404,
+        headers: { "content-type": "application/json; charset=utf-8" },
+      });
+    }
+
+    state.messages[index] = {
+      ...state.messages[index],
+      text: payload.text.trim().slice(0, 500),
+    };
+    cleanupChat();
+
+    return new Response(JSON.stringify(state.messages[index]), {
+      headers: { "content-type": "application/json; charset=utf-8" },
+    });
+  }
+
+  if (request.method === "DELETE") {
+    const payload = await request.json().catch(() => null);
+    if (!payload || typeof payload.id !== "string") {
+      return new Response(JSON.stringify({ error: "Payload invalide" }), {
+        status: 400,
+        headers: { "content-type": "application/json; charset=utf-8" },
+      });
+    }
+
+    const state = getChatState();
+    const index = state.messages.findIndex((message) => message.id === payload.id);
+    if (index === -1) {
+      return new Response(JSON.stringify({ error: "Message introuvable" }), {
+        status: 404,
+        headers: { "content-type": "application/json; charset=utf-8" },
+      });
+    }
+
+    const [removed] = state.messages.splice(index, 1);
+    cleanupChat();
+
+    return new Response(JSON.stringify(removed), {
+      headers: { "content-type": "application/json; charset=utf-8" },
+    });
+  }
+
   return new Response(JSON.stringify({ error: "Méthode non autorisée" }), {
     status: 405,
-    headers: { "content-type": "application/json; charset=utf-8", Allow: "GET, POST" },
+    headers: { "content-type": "application/json; charset=utf-8", Allow: "GET, POST, PUT, DELETE" },
   });
 }
 

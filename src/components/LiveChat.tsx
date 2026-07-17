@@ -24,6 +24,7 @@ export function LiveChat() {
   const [text, setText] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const currentAuthorId = typeof window !== "undefined" ? (window.localStorage.getItem("rtcr.livechat.author.v1") ?? "") : "";
   const { settings } = useSettings();
@@ -32,6 +33,17 @@ export function LiveChat() {
 
   useEffect(() => {
     setName(window.localStorage.getItem(NAME_KEY) ?? "");
+
+    const updateKeyboardState = () => {
+      const viewport = window.visualViewport;
+      if (!viewport) return;
+      const keyboardVisible = viewport.height < window.innerHeight - 120;
+      setKeyboardOpen(keyboardVisible);
+    };
+
+    updateKeyboardState();
+    window.visualViewport?.addEventListener("resize", updateKeyboardState);
+    window.addEventListener("resize", updateKeyboardState);
 
     let ignore = false;
     const load = async () => {
@@ -65,6 +77,8 @@ export function LiveChat() {
     return () => {
       ignore = true;
       window.clearInterval(interval);
+      window.visualViewport?.removeEventListener("resize", updateKeyboardState);
+      window.removeEventListener("resize", updateKeyboardState);
     };
   }, [messages.length, settings.notifications]);
 
@@ -95,6 +109,9 @@ export function LiveChat() {
   async function saveEdit() {
     const value = editValue.trim();
     if (!editingId || !value) return;
+    const target = messages.find((m) => m.id === editingId);
+    if (!target || (target.authorId ?? "") !== currentAuthorId) return;
+
     const res = await fetch(API_URL, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -109,6 +126,9 @@ export function LiveChat() {
 
   async function deleteMessage(id: string) {
     if (!id) return;
+    const target = messages.find((m) => m.id === id);
+    if (!target || (target.authorId ?? "") !== currentAuthorId) return;
+
     const res = await fetch(API_URL, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
@@ -175,7 +195,7 @@ export function LiveChat() {
                     <button type="button" onClick={() => { setEditingId(m.id); setEditValue(m.text); }} className="text-[11px] font-semibold text-primary">
                       Modifier
                     </button>
-                    <button type="button" onClick={() => deleteMessage(m.id)} className="text-[11px] font-semibold text-secondary">
+                    <button type="button" onClick={() => void deleteMessage(m.id)} className="text-[11px] font-semibold text-secondary">
                       Supprimer
                     </button>
                   </div>
@@ -185,7 +205,7 @@ export function LiveChat() {
           })
         )}
       </div>
-      <form onSubmit={send} className="sticky bottom-0 z-10 space-y-2 bg-surface-container-low pt-2">
+      <form onSubmit={send} className={`sticky z-10 space-y-2 bg-surface-container-low pt-2 transition-all ${keyboardOpen ? "bottom-20" : "bottom-0"}`}>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
