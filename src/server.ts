@@ -146,11 +146,22 @@ async function handleChatRequest(request: Request): Promise<Response | null> {
     }
 
     const senderIp = getClientIp(request);
-    if (state.messages[index].senderIp !== senderIp) {
-      return new Response(JSON.stringify({ error: "Non autorisé" }), {
-        status: 403,
-        headers: { "content-type": "application/json; charset=utf-8" },
-      });
+    // Prefer authorId check when available (client-side stored id), fallback to senderIp
+    const payloadAuthorId = typeof payload.authorId === 'string' ? payload.authorId : undefined;
+    if (state.messages[index].authorId) {
+      if (!payloadAuthorId || state.messages[index].authorId !== payloadAuthorId) {
+        return new Response(JSON.stringify({ error: "Non autorisé" }), {
+          status: 403,
+          headers: { "content-type": "application/json; charset=utf-8" },
+        });
+      }
+    } else {
+      if (state.messages[index].senderIp !== senderIp) {
+        return new Response(JSON.stringify({ error: "Non autorisé" }), {
+          status: 403,
+          headers: { "content-type": "application/json; charset=utf-8" },
+        });
+      }
     }
 
     state.messages[index] = {
@@ -183,11 +194,22 @@ async function handleChatRequest(request: Request): Promise<Response | null> {
     }
 
     const senderIp = getClientIp(request);
-    if (state.messages[index].senderIp !== senderIp) {
-      return new Response(JSON.stringify({ error: "Non autorisé" }), {
-        status: 403,
-        headers: { "content-type": "application/json; charset=utf-8" },
-      });
+    // Prefer authorId check when available (client-side stored id), fallback to senderIp
+    const payloadAuthorId = typeof payload.authorId === 'string' ? payload.authorId : undefined;
+    if (state.messages[index].authorId) {
+      if (!payloadAuthorId || state.messages[index].authorId !== payloadAuthorId) {
+        return new Response(JSON.stringify({ error: "Non autorisé" }), {
+          status: 403,
+          headers: { "content-type": "application/json; charset=utf-8" },
+        });
+      }
+    } else {
+      if (state.messages[index].senderIp !== senderIp) {
+        return new Response(JSON.stringify({ error: "Non autorisé" }), {
+          status: 403,
+          headers: { "content-type": "application/json; charset=utf-8" },
+        });
+      }
     }
 
     const [removed] = state.messages.splice(index, 1);

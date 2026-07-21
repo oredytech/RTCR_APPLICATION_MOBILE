@@ -133,7 +133,7 @@ export function LiveChat() {
     const res = await fetch(API_URL, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: editingId, text: value.slice(0, 500), senderIp: viewerIp }),
+      body: JSON.stringify({ id: editingId, text: value.slice(0, 500), senderIp: viewerIp, authorId: window.localStorage.getItem("rtcr.livechat.author.v1") ?? "" }),
     });
     if (!res.ok) return;
     const updated = (await res.json()) as Msg;
@@ -150,7 +150,7 @@ export function LiveChat() {
     const res = await fetch(API_URL, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, senderIp: viewerIp }),
+      body: JSON.stringify({ id, senderIp: viewerIp, authorId: window.localStorage.getItem("rtcr.livechat.author.v1") ?? "" }),
     });
     if (!res.ok) return;
     const removed = (await res.json()) as Msg;
@@ -186,24 +186,15 @@ export function LiveChat() {
             <div className="space-y-4">
               {messages.map((m, idx) => {
                 const prev = messages[idx - 1];
-                const isMine = viewerIp ? (m.senderIp ?? "") === viewerIp : (m.authorId ?? "") === currentAuthorId;
+                const isMine = (m.authorId ?? "") ? (m.authorId ?? "") === currentAuthorId : (viewerIp ? (m.senderIp ?? "") === viewerIp : false);
                 const showAvatar = !isMine && (!prev || prev.authorId !== m.authorId);
                 const initials = (m.name || "?").split(" ").map((s) => s[0]).join("").slice(0, 2).toUpperCase();
 
                 return (
-                  <div key={m.id} className={`w-full flex items-end ${isMine ? 'justify-end' : 'justify-start'}`}>
+                  <div key={m.id} className={`w-full flex items-end ${isMine ? 'justify-start' : 'justify-end'}`}>
                     <div className="flex items-end gap-3 px-1 sm:px-2 w-full box-border">
-                      {!isMine && (
-                        <div className="flex-shrink-0 mr-0 sm:mr-3">
-                          {showAvatar ? (
-                            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gray-300 flex items-center justify-center text-xs font-semibold text-gray-700">{initials}</div>
-                          ) : (
-                            <div className="w-8 h-8 sm:w-9 sm:h-9" />
-                          )}
-                        </div>
-                      )}
 
-                      <div className={`flex-1 ${isMine ? 'flex justify-end' : 'flex justify-start'}`}>
+                      <div className={`flex-1 ${isMine ? 'flex justify-start' : 'flex justify-end'}`}>
                         <div className={`max-w-[calc(100%-64px)] sm:max-w-[75%]`}>
                           <div className="text-[12px] sm:text-[13px] font-semibold text-slate-600 mb-1">{m.name}</div>
 
@@ -222,12 +213,12 @@ export function LiveChat() {
                             </div>
                           ) : (
                             <>
-                              <div className={`${isMine ? 'bg-primary text-on-primary rounded-br-none' : 'bg-slate-100 text-slate-900 rounded-bl-none'} px-3 sm:px-4 py-2 rounded-2xl shadow-sm break-words`}> 
+                              <div className={`${isMine ? 'bg-primary text-on-primary rounded-bl-none' : 'bg-slate-100 text-slate-900 rounded-br-none'} px-3 sm:px-4 py-2 rounded-2xl shadow-sm break-words`}> 
                                 <div className="text-sm sm:text-base">{m.text}</div>
                               </div>
 
                               <div className={`mt-1 flex items-center justify-between gap-2 text-[10px] sm:text-[11px] ${isMine ? 'text-slate-400' : 'text-slate-400'}`}>
-                                <span className={`${isMine ? 'text-right' : 'text-left'}`}>{new Date(m.ts).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
+                                <span className={`${isMine ? 'text-left' : 'text-right'}`}>{new Date(m.ts).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
                                 {isMine && (
                                   <div className="flex gap-2">
                                     <button type="button" onClick={() => { setEditingId(m.id); setEditValue(m.text); }} className="text-[11px] font-semibold text-on-surface-variant">Modifier</button>
@@ -239,6 +230,16 @@ export function LiveChat() {
                           )}
                         </div>
                       </div>
+
+                      {!isMine && (
+                        <div className="flex-shrink-0 ml-0 sm:ml-3">
+                          {showAvatar ? (
+                            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gray-300 flex items-center justify-center text-xs font-semibold text-gray-700">{initials}</div>
+                          ) : (
+                            <div className="w-8 h-8 sm:w-9 sm:h-9" />
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
