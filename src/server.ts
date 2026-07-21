@@ -108,12 +108,13 @@ async function handleChatRequest(request: Request): Promise<Response | null> {
     const name = payload.name.trim().slice(0, 24) || "Anonyme";
     const text = payload.text.trim().slice(0, 500);
 
+    const authorId = typeof payload.authorId === "string" && payload.authorId.trim() ? payload.authorId.trim() : crypto.randomUUID();
     const msg: Msg = {
       id: crypto.randomUUID(),
       name,
       text,
       ts: Date.now(),
-      authorId: typeof payload.authorId === "string" ? payload.authorId : undefined,
+      authorId,
       senderIp: getClientIp(request),
     };
 
@@ -145,18 +146,18 @@ async function handleChatRequest(request: Request): Promise<Response | null> {
       });
     }
 
-    const senderIp = getClientIp(request);
-    // Prefer authorId check when available (client-side stored id), fallback to senderIp
-    const payloadAuthorId = typeof payload.authorId === 'string' ? payload.authorId : undefined;
-    if (state.messages[index].authorId) {
-      if (!payloadAuthorId || state.messages[index].authorId !== payloadAuthorId) {
+    const payloadAuthorId = typeof payload.authorId === "string" ? payload.authorId.trim() : undefined;
+    const message = state.messages[index];
+    if (message.authorId) {
+      if (!payloadAuthorId || message.authorId !== payloadAuthorId) {
         return new Response(JSON.stringify({ error: "Non autorisé" }), {
           status: 403,
           headers: { "content-type": "application/json; charset=utf-8" },
         });
       }
     } else {
-      if (state.messages[index].senderIp !== senderIp) {
+      const senderIp = getClientIp(request);
+      if (message.senderIp !== senderIp) {
         return new Response(JSON.stringify({ error: "Non autorisé" }), {
           status: 403,
           headers: { "content-type": "application/json; charset=utf-8" },
@@ -165,7 +166,7 @@ async function handleChatRequest(request: Request): Promise<Response | null> {
     }
 
     state.messages[index] = {
-      ...state.messages[index],
+      ...message,
       text: payload.text.trim().slice(0, 500),
     };
     cleanupChat();
@@ -193,23 +194,12 @@ async function handleChatRequest(request: Request): Promise<Response | null> {
       });
     }
 
-    const senderIp = getClientIp(request);
-    // Prefer authorId check when available (client-side stored id), fallback to senderIp
-    const payloadAuthorId = typeof payload.authorId === 'string' ? payload.authorId : undefined;
-    if (state.messages[index].authorId) {
-      if (!payloadAuthorId || state.messages[index].authorId !== payloadAuthorId) {
-        return new Response(JSON.stringify({ error: "Non autorisé" }), {
-          status: 403,
-          headers: { "content-type": "application/json; charset=utf-8" },
-        });
-      }
-    } else {
-      if (state.messages[index].senderIp !== senderIp) {
-        return new Response(JSON.stringify({ error: "Non autorisé" }), {
-          status: 403,
-          headers: { "content-type": "application/json; charset=utf-8" },
-        });
-      }
+    const payloadAuthorId = typeof payload.authorId === "string" ? payload.authorId.trim() : undefined;
+    if (!state.messages[index].authorId || !payloadAuthorId || state.messages[index].authorId !== payloadAuthorId) {
+      return new Response(JSON.stringify({ error: "Non autorisé" }), {
+        status: 403,
+        headers: { "content-type": "application/json; charset=utf-8" },
+      });
     }
 
     const [removed] = state.messages.splice(index, 1);

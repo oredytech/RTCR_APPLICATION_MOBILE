@@ -47,14 +47,15 @@ export function LiveChat() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [viewerIp, setViewerIp] = useState("");
+  const [currentAuthorId, setCurrentAuthorId] = useState("");
   const scrollRef = useRef<HTMLDivElement | null>(null);
-  const currentAuthorId = typeof window !== "undefined" ? (window.localStorage.getItem("rtcr.livechat.author.v1") ?? "") : "";
   const { settings } = useSettings();
   const lastSeenRef = useRef<number>(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     setName(window.localStorage.getItem(NAME_KEY) ?? "");
+    setCurrentAuthorId(window.localStorage.getItem("rtcr.livechat.author.v1") ?? "");
 
     let ignore = false;
     const load = async () => {
@@ -110,17 +111,28 @@ export function LiveChat() {
     const n = (name.trim() || "Anonyme").slice(0, 24);
     if (!t) return;
 
+    const payload: Record<string, unknown> = {
+      name: n,
+      text: t.slice(0, 500),
+    };
+    if (currentAuthorId) {
+      payload.authorId = currentAuthorId;
+    }
+
     const res = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: n, text: t.slice(0, 500), authorId: window.localStorage.getItem("rtcr.livechat.author.v1") ?? "", senderIp: viewerIp }),
+      body: JSON.stringify(payload),
     });
 
     if (!res.ok) return;
     const msg = (await res.json()) as Msg;
     setMessages((prev) => [...prev, msg].slice(-MAX));
     window.localStorage.setItem(NAME_KEY, n);
-    window.localStorage.setItem("rtcr.livechat.author.v1", msg.authorId ?? "");
+    if (msg.authorId) {
+      window.localStorage.setItem("rtcr.livechat.author.v1", msg.authorId);
+      setCurrentAuthorId(msg.authorId);
+    }
     setText("");
   }
 
@@ -128,12 +140,12 @@ export function LiveChat() {
     const value = editValue.trim();
     if (!editingId || !value) return;
     const target = messages.find((m) => m.id === editingId);
-    if (!target || (target.authorId ?? "") !== currentAuthorId) return;
+    if (!target || !target.authorId || target.authorId !== currentAuthorId) return;
 
     const res = await fetch(API_URL, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: editingId, text: value.slice(0, 500), senderIp: viewerIp, authorId: window.localStorage.getItem("rtcr.livechat.author.v1") ?? "" }),
+      body: JSON.stringify({ id: editingId, text: value.slice(0, 500), authorId: currentAuthorId }),
     });
     if (!res.ok) return;
     const updated = (await res.json()) as Msg;
@@ -145,12 +157,12 @@ export function LiveChat() {
   async function deleteMessage(id: string) {
     if (!id) return;
     const target = messages.find((m) => m.id === id);
-    if (!target || (target.authorId ?? "") !== currentAuthorId) return;
+    if (!target || !target.authorId || target.authorId !== currentAuthorId) return;
 
     const res = await fetch(API_URL, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, senderIp: viewerIp, authorId: window.localStorage.getItem("rtcr.livechat.author.v1") ?? "" }),
+      body: JSON.stringify({ id, authorId: currentAuthorId }),
     });
     if (!res.ok) return;
     const removed = (await res.json()) as Msg;
@@ -186,7 +198,7 @@ export function LiveChat() {
             <div className="space-y-4">
               {messages.map((m, idx) => {
                 const prev = messages[idx - 1];
-                const isMine = (m.authorId ?? "") ? (m.authorId ?? "") === currentAuthorId : (viewerIp ? (m.senderIp ?? "") === viewerIp : false);
+                const isMine = !!m.authorId && m.authorId === currentAuthorId;
                 const showAvatar = !isMine && (!prev || prev.authorId !== m.authorId);
                 const initials = (m.name || "?").split(" ").map((s) => s[0]).join("").slice(0, 2).toUpperCase();
 

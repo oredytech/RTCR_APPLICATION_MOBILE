@@ -98,8 +98,7 @@ function LivePage() {
               Radio 96.0 Mhz FM
             </span>
           </div>
-          <h2 className="mb-1 px-4 text-3xl font-bold">RTCR La Référence</h2>
-          <p className="text-sm font-semibold uppercase tracking-widest text-primary">Titre en cours : {title}</p>
+          <h2 className="mb-1 px-4 text-3xl font-bold">RTC la Référence</h2>
           <p className="text-on-surface-variant">Komanda · République démocratique du Congo</p>
         </div>
 
@@ -127,13 +126,18 @@ function LivePage() {
             <a href="tel:+243994700510" aria-label="Appeler la station" className="text-on-surface-variant transition-transform hover:text-primary active:scale-90">
               <Icon name="call" className="text-[28px]" />
             </a>
-            <button
-              onClick={toggle}
-              className="flex h-20 w-20 items-center justify-center rounded-2xl bg-red-600 text-white transition-transform neon-glow active:scale-95"
-              aria-label={playing ? "Pause" : "Lecture"}
-            >
-              <Icon name={loading ? "hourglass_empty" : playing ? "pause" : "play_arrow"} filled className="text-[44px]" />
-            </button>
+            <div className="relative">
+              {loading && (
+                <span className="absolute inset-0 rounded-2xl border-4 border-white/20 border-t-white animate-spin" />
+              )}
+              <button
+                onClick={toggle}
+                className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-red-600 text-white transition-transform neon-glow active:scale-95"
+                aria-label={playing ? "Pause" : "Lecture"}
+              >
+                <Icon name={loading ? "hourglass_empty" : playing ? "pause" : "play_arrow"} filled className="text-[44px]" />
+              </button>
+            </div>
             <a href="mailto:r_tv_la_reference96mhz@yahoo.com" aria-label="Envoyer un e-mail" className="text-on-surface-variant transition-transform hover:text-primary active:scale-90">
               <Icon name="mail" className="text-[28px]" />
             </a>
