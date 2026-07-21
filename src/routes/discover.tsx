@@ -52,6 +52,7 @@ export const Route = createFileRoute("/discover")({
 
 function DiscoverPage() {
   const [q, setQ] = useState("");
+  const [redirectionMessage, setRedirectionMessage] = useState<string | null>(null);
   const { data: actus = [], isLoading, refetch, isFetching, dataUpdatedAt } =
     useQuery({
       queryKey: ["actualites"],
@@ -59,6 +60,12 @@ function DiscoverPage() {
       refetchInterval: 5 * 60 * 1000,
       staleTime: 5 * 60 * 1000,
     });
+
+  const handleRedirect = (url: string) => {
+    setRedirectionMessage("Vous allez être redirigé vers le site 'rtcr.net'.");
+    window.open(url, "_blank", "noopener");
+    window.setTimeout(() => setRedirectionMessage(null), 3200);
+  };
 
   const filtered = useMemo(() => {
     if (!q.trim()) return actus;
@@ -94,21 +101,27 @@ function DiscoverPage() {
             onChange={(e) => setQ(e.target.value)}
             type="text"
             placeholder="Rechercher une actualité"
-            className="h-14 w-full rounded-2xl border-none bg-surface-container-high pl-12 pr-24 text-on-surface outline-none transition-all placeholder:text-outline focus:ring-2 focus:ring-primary"
+            className="h-14 w-full rounded-2xl border-none bg-surface-container-high pl-12 pr-16 text-on-surface outline-none transition-all placeholder:text-outline focus:ring-2 focus:ring-primary"
           />
           <button
             onClick={() => refetch()}
-            className="absolute right-2 top-1/2 flex h-10 -translate-y-1/2 items-center gap-1 rounded-xl bg-primary/15 px-3 text-xs font-semibold uppercase tracking-widest text-primary transition-opacity active:opacity-70"
+            aria-label="Actualiser les actualités"
+            className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-xl bg-primary/15 text-primary transition-opacity hover:bg-primary/20 active:opacity-70"
           >
             <Icon
               name="refresh"
-              className={`text-[16px] ${isFetching ? "animate-spin" : ""}`}
+              className={`text-[18px] ${isFetching ? "animate-spin" : ""}`}
             />
-            Actualiser
           </button>
         </div>
 
         <AdBanner />
+
+        {redirectionMessage ? (
+          <div className="rounded-2xl border border-primary/20 bg-primary/10 px-4 py-3 text-sm text-primary">
+            {redirectionMessage}
+          </div>
+        ) : null}
 
         <Link
           to="/podcasts"
@@ -142,6 +155,10 @@ function DiscoverPage() {
               href={a.url}
               target="_blank"
               rel="noreferrer"
+              onClick={(event) => {
+                event.preventDefault();
+                handleRedirect(a.url);
+              }}
               className="group flex gap-4 overflow-hidden rounded-2xl p-3 glass-card transition-transform active:scale-[0.99]"
             >
               <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg bg-surface-container-high">

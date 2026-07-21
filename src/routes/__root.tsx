@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SettingsProvider } from "../lib/settings-context";
 import { RadioProvider } from "../lib/radio-context";
+import { rtcrLogoSrc } from "../lib/assets";
 
 const THEME_INIT_SCRIPT = `(() => { try { var s = localStorage.getItem('rtcr.settings.v1'); var t = s ? (JSON.parse(s).theme || 'light') : 'light'; var dark = t === 'dark' || (t === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches); var r = document.documentElement; r.classList.toggle('dark', dark); r.classList.toggle('light', !dark); } catch(e){} })();`;
 
@@ -153,12 +154,21 @@ function RootComponent() {
     return () => window.clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    const onContextMenu = (event: MouseEvent) => {
+      event.preventDefault();
+    };
+
+    document.addEventListener("contextmenu", onContextMenu);
+    return () => document.removeEventListener("contextmenu", onContextMenu);
+  }, []);
+
   if (isBooting) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-4">
         <div className="flex w-full max-w-sm flex-col items-center text-center">
           <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-primary/15 text-primary shadow-[0_0_30px_rgba(26,75,255,0.15)]">
-            <span className="text-4xl font-black tracking-tight">RT</span>
+            <img src={rtcrLogoSrc} alt="RTCR" className="h-12 w-12 object-contain" />
           </div>
           <div className="mb-4 h-2 w-32 overflow-hidden rounded-full bg-surface-container-high">
             <div className="h-full w-1/2 animate-[pulse_1.2s_ease-in-out_infinite] rounded-full bg-primary" />
