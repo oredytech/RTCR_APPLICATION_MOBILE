@@ -2,6 +2,9 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useSettings } from "@/lib/settings-context";
 import { showLocalNotification } from "@/lib/notification-manager";
 import { Icon } from "./Icon";
+import { useRadio } from "@/lib/radio-context";
+import { AppImage } from "./AppImage";
+import { rtcrLogoSrc } from "@/lib/assets";
 
 const CHAT_BELL_AUDIO = "/audio/chat-alert.mp3";
 
@@ -15,28 +18,29 @@ const MAX = 100;
 function getBubbleStyle(isMine: boolean) {
   if (isMine) {
     return {
-      bubbleClass: "bg-[#002296] text-white",
+      bubbleClass: "bg-[#25D366] text-white",
       metaClass: "text-white/90",
-      nameClass: "text-white",
-      timeClass: "text-white/70",
-      alignClass: "justify-start",
+      nameClass: "text-white/90",
+      timeClass: "text-white/80",
+      alignClass: "justify-end",
       textClass: "text-white",
       actionClass: "text-white/90",
     };
   }
 
   return {
-    bubbleClass: "bg-[#A3B9FF] text-[#002296]",
-    metaClass: "text-[#002296]",
-    nameClass: "text-[#002296]",
-    timeClass: "text-[#002296]/70",
-    alignClass: "justify-end",
-    textClass: "text-[#002296]",
-    actionClass: "text-[#002296]",
+    bubbleClass: "bg-white text-[#111827]",
+    metaClass: "text-[#6b7280]",
+    nameClass: "text-[#6b7280]",
+    timeClass: "text-[#6b7280]/70",
+    alignClass: "justify-start",
+    textClass: "text-[#111827]",
+    actionClass: "text-[#6b7280]",
   };
 }
 
 export function LiveChat() {
+  const { playing, loading, toggle } = useRadio();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [name, setName] = useState("");
   const [text, setText] = useState("");
@@ -154,99 +158,121 @@ export function LiveChat() {
   }
 
   return (
-    <section className="flex h-full w-full flex-col overflow-hidden bg-surface-container-low p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-sm font-bold uppercase tracking-widest text-primary">Salon en direct</h3>
-        <span className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-widest text-on-surface-variant">
-          <Icon name="forum" className="text-[14px]" />
-          {messages.length}
-        </span>
-      </div>
-      <div
-        ref={scrollRef}
-        className="mb-3 flex-1 min-h-0 space-y-2 overflow-y-auto rounded-lg bg-surface-container-high/50 p-2 pb-4 text-sm"
-      >
-        {messages.length === 0 ? (
-          <p className="py-8 text-center text-xs text-on-surface-variant">
-            Soyez le premier à écrire dans le salon.
-          </p>
-        ) : (
-          messages.map((m) => {
-            const isMine = viewerIp ? (m.senderIp ?? "") === viewerIp : (m.authorId ?? "") === currentAuthorId;
-            const style = getBubbleStyle(isMine);
-            return (
-              <div key={m.id} className={`flex ${style.alignClass}`}>
-                <div className={`max-w-[88%] rounded-2xl px-3 py-2 shadow-sm ${style.bubbleClass}`}>
-                  <div className="flex items-baseline justify-between gap-2">
-                    <span className={`truncate text-[11px] font-bold ${style.nameClass}`}>{m.name}</span>
-                    <span className={`text-[10px] ${style.timeClass}`}>
-                      {new Date(m.ts).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
-                    </span>
-                  </div>
-                  {editingId === m.id ? (
-                    <div className="mt-2 space-y-2">
-                      <input
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        maxLength={500}
-                        className="w-full rounded-lg border-none bg-surface-container-high px-2 py-1 text-sm outline-none"
-                      />
-                      <div className="flex gap-2">
-                        <button type="button" onClick={saveEdit} className="rounded-lg bg-primary px-2 py-1 text-[11px] font-semibold text-on-primary">
-                          Enregistrer
-                        </button>
-                        <button type="button" onClick={() => { setEditingId(null); setEditValue(""); }} className="rounded-lg bg-surface-container-high px-2 py-1 text-[11px] font-semibold text-on-surface-variant">
-                          Annuler
-                        </button>
+    <section className="flex h-full w-full items-center justify-center bg-gray-100 p-2 sm:p-4">
+      <div className="w-full max-w-full sm:max-w-3xl h-[90vh] sm:h-[80vh] md:h-[80vh] flex flex-col bg-white rounded-2xl shadow-xl overflow-hidden">
+        {/* Header */}
+        <header className="flex items-center gap-3 px-3 sm:px-4 py-3 border-b">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden bg-white flex items-center justify-center">
+            <AppImage src={rtcrLogoSrc} alt="RTCR" className="w-9 h-9 object-contain" />
+          </div>
+          <div className="flex-1">
+            <div className="text-sm sm:text-base font-semibold">Salon en direct</div>
+            <div className="text-[11px] sm:text-xs text-slate-500">Conversation publique · {messages.length} messages</div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={toggle} aria-label={playing ? 'Pause radio' : 'Lecture radio'} className="p-2 rounded-lg bg-red-600 text-white hover:bg-red-700 active:scale-95">
+              <Icon name={loading ? 'hourglass_empty' : playing ? 'pause' : 'play_arrow'} filled className="text-[20px] text-white" />
+            </button>
+            <button className="p-2 rounded-lg hover:bg-slate-100 hidden sm:inline-flex"><Icon name="search" /></button>
+            <button className="p-2 rounded-lg hover:bg-slate-100 hidden sm:inline-flex"><Icon name="more_vert" /></button>
+          </div>
+        </header>
+
+        {/* Messages */}
+        <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 sm:p-4 bg-gradient-to-b from-white to-gray-50">
+          {messages.length === 0 ? (
+            <div className="h-full flex items-center justify-center text-slate-500">Aucun message pour le moment — participez à la conversation !</div>
+          ) : (
+            <div className="space-y-4">
+              {messages.map((m, idx) => {
+                const prev = messages[idx - 1];
+                const isMine = viewerIp ? (m.senderIp ?? "") === viewerIp : (m.authorId ?? "") === currentAuthorId;
+                const showAvatar = !isMine && (!prev || prev.authorId !== m.authorId);
+                const initials = (m.name || "?").split(" ").map((s) => s[0]).join("").slice(0, 2).toUpperCase();
+
+                return (
+                  <div key={m.id} className={`w-full flex items-end ${isMine ? 'justify-end' : 'justify-start'}`}>
+                    <div className="flex items-end gap-3 px-1 sm:px-2 w-full box-border">
+                      {!isMine && (
+                        <div className="flex-shrink-0 mr-0 sm:mr-3">
+                          {showAvatar ? (
+                            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gray-300 flex items-center justify-center text-xs font-semibold text-gray-700">{initials}</div>
+                          ) : (
+                            <div className="w-8 h-8 sm:w-9 sm:h-9" />
+                          )}
+                        </div>
+                      )}
+
+                      <div className={`flex-1 ${isMine ? 'flex justify-end' : 'flex justify-start'}`}>
+                        <div className={`max-w-[calc(100%-64px)] sm:max-w-[75%]`}>
+                          <div className="text-[12px] sm:text-[13px] font-semibold text-slate-600 mb-1">{m.name}</div>
+
+                          {editingId === m.id ? (
+                            <div className="space-y-2">
+                              <input
+                                value={editValue}
+                                onChange={(e) => setEditValue(e.target.value)}
+                                maxLength={500}
+                                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none"
+                              />
+                              <div className="flex gap-2">
+                                <button type="button" onClick={saveEdit} className="rounded-lg bg-primary px-3 py-1 text-sm font-semibold text-on-primary">Enregistrer</button>
+                                <button type="button" onClick={() => { setEditingId(null); setEditValue(""); }} className="rounded-lg bg-surface-container-high px-3 py-1 text-sm font-semibold">Annuler</button>
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              <div className={`${isMine ? 'bg-primary text-on-primary rounded-br-none' : 'bg-slate-100 text-slate-900 rounded-bl-none'} px-3 sm:px-4 py-2 rounded-2xl shadow-sm break-words`}> 
+                                <div className="text-sm sm:text-base">{m.text}</div>
+                              </div>
+
+                              <div className={`mt-1 flex items-center justify-between gap-2 text-[10px] sm:text-[11px] ${isMine ? 'text-slate-400' : 'text-slate-400'}`}>
+                                <span className={`${isMine ? 'text-right' : 'text-left'}`}>{new Date(m.ts).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
+                                {isMine && (
+                                  <div className="flex gap-2">
+                                    <button type="button" onClick={() => { setEditingId(m.id); setEditValue(m.text); }} className="text-[11px] font-semibold text-on-surface-variant">Modifier</button>
+                                    <button type="button" onClick={() => void deleteMessage(m.id)} className="text-[11px] font-semibold text-red-600">Supprimer</button>
+                                  </div>
+                                )}
+                              </div>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  ) : (
-                    <p className={`break-words text-sm ${style.textClass}`}>{m.text}</p>
-                  )}
-                  {isMine && editingId !== m.id && (
-                    <div className="mt-2 flex gap-2">
-                      <button type="button" onClick={() => { setEditingId(m.id); setEditValue(m.text); }} className={`text-[11px] font-semibold ${style.actionClass}`}>
-                        Modifier
-                      </button>
-                      <button type="button" onClick={() => void deleteMessage(m.id)} className={`text-[11px] font-semibold ${style.actionClass}`}>
-                        Supprimer
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })
-        )}
-      </div>
-      <form onSubmit={send} className="mt-auto shrink-0 space-y-2 bg-surface-container-low pt-2">
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Votre nom"
-          maxLength={24}
-          className="w-full rounded-lg border-none bg-surface-container-high px-3 py-2 text-sm outline-none placeholder:text-outline focus:ring-2 focus:ring-primary"
-        />
-        <div className="flex gap-2">
-          <input
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Écrire un message…"
-            maxLength={500}
-            className="flex-1 rounded-lg border-none bg-surface-container-high px-3 py-2 text-sm outline-none placeholder:text-outline focus:ring-2 focus:ring-primary"
-          />
-          <button
-            type="submit"
-            aria-label="Envoyer"
-            className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-on-primary active:scale-95"
-          >
-            <Icon name="send" filled />
-          </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
-      </form>
-      <p className="mt-2 text-[10px] text-on-surface-variant">
-        Message de discussion dans le chat.
-      </p>
+
+        {/* Composer */}
+        <form onSubmit={send} className="px-3 sm:px-4 py-3 border-t bg-white">
+          <div className="mb-2">
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Votre nom (affiché aux autres)"
+              maxLength={24}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="Écrire un message..."
+              maxLength={500}
+              className="flex-1 rounded-full border border-slate-200 px-3 sm:px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+            />
+            <button type="submit" className="ml-1 rounded-full bg-primary p-2 sm:p-3 text-white shadow-md">
+              <Icon name="send" filled />
+            </button>
+          </div>
+          <div className="mt-2 text-[11px] sm:text-xs text-slate-400">Ton nom sera utilisé pour t'identifier dans la conversation.</div>
+        </form>
+      </div>
     </section>
   );
 }
